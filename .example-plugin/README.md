@@ -12,7 +12,7 @@ example configuration for lpm:
 }
 ```
 
-and then run:
+then run:
 ```sh
 lpm --plugin example-plugin
 ```
