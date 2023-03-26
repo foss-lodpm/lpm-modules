@@ -13,3 +13,4 @@ Cargo.lock
 *.so
 *.o
 .cache
+zig-cache
