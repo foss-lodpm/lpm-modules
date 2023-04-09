@@ -1,0 +1,58 @@
+{
+	"name": "",
+	"description": "",
+	"maintainer": "",
+	"source_pkg": "",
+	"repository": "",
+	"homepage": "",
+	"arch": "",
+	"kind": "",
+	"tags": [],
+	"version": {
+		"readable_format": "",
+		"major": 0,
+		"minor": 0,
+		"patch": 0,
+		"tag": ""
+	},
+	"license": "",
+	"runtime_dependencies": [
+		{
+			"name": "",
+			"version": {
+				"condition": "greater_or_equal",
+				"readable_format": "",
+				"major": 0,
+				"minor": 0,
+				"patch": 0,
+				"tag": ""
+			}
+		}
+	],
+	"runtime_suggestions": [
+		{
+			"name": "",
+			"version": {
+				"condition": "greater_or_equal",
+				"readable_format": "",
+				"major": 0,
+				"minor": 0,
+				"patch": 0,
+				"tag": ""
+			}
+		}
+	],
+	"build_dependencies": [
+		{
+			"name": "",
+			"version": {
+				"condition": "greater_or_equal",
+				"readable_format": "",
+				"major": 0,
+				"minor": 0,
+				"patch": 0,
+				"tag": ""
+			}
+		}
+	]
+}
