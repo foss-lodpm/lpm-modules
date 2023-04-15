@@ -17,11 +17,11 @@ import (
 func main() {}
 
 type Version struct {
-	ReadableFormat string `json:"readable_format"`
-	Major          int    `json:"major"`
-	Minor          int    `json:"minor"`
-	Patch          int    `json:"patch"`
-	Tag            string `json:"tag"`
+	ReadableFormat string  `json:"readable_format"`
+	Major          int     `json:"major"`
+	Minor          int     `json:"minor"`
+	Patch          int     `json:"patch"`
+	Tag            *string `json:"tag"`
 }
 
 type Dependency struct {
@@ -118,6 +118,17 @@ func handle_cli(args []string) {
 
 }
 
+func set_version_readable_format(version *Version) {
+	readable_format := fmt.Sprintf("%d.%d.%d", version.Major, version.Minor, version.Patch)
+
+	if version.Tag != nil {
+		readable_format += fmt.Sprintf("-%s", *version.Tag)
+	}
+
+	version.ReadableFormat = readable_format
+
+}
+
 func create_default_template(c *cli.Context, template_name string, out_path string) {
 	if out_path != "" {
 		err := os.MkdirAll(out_path, os.ModePerm)
@@ -144,6 +155,8 @@ func create_default_template(c *cli.Context, template_name string, out_path stri
 		RuntimeSuggestions:  []Dependency{},
 		BuildDependencies:   []Dependency{},
 	}
+
+	set_version_readable_format(&template.Version)
 
 	template_json, err := json.MarshalIndent(template, "", " ")
 	if err != nil {
