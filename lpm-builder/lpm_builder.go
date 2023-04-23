@@ -4,10 +4,12 @@ package main
 
 import "C"
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 	"time"
 	"unsafe"
 
@@ -75,12 +77,19 @@ func handle_cli(args []string) {
 					template_name := c.String("name")
 					out_path := c.String("out")
 
+					if out_path != "" {
+						err := os.MkdirAll(out_path, os.ModePerm)
+						failOnError(err, "Failed on creating directory")
+
+						out_path += "/"
+					}
+
 					if is_default && is_interactive {
 						cli.ShowSubcommandHelp(c)
 					} else if is_default {
 						create_default_template(c, template_name, out_path)
 					} else if is_interactive {
-						fmt.Println("execute function for interactive mode")
+						create_template_interactively(c, template_name, out_path)
 					} else {
 						cli.ShowSubcommandHelp(c)
 					}
@@ -130,15 +139,6 @@ func set_version_readable_format(version *Version) {
 }
 
 func create_default_template(c *cli.Context, template_name string, out_path string) {
-	if out_path != "" {
-		err := os.MkdirAll(out_path, os.ModePerm)
-		if err != nil {
-			fmt.Println(err)
-		}
-
-		out_path += "/"
-	}
-
 	template := &Template{
 		Name:                template_name,
 		Description:         "",
@@ -159,14 +159,61 @@ func create_default_template(c *cli.Context, template_name string, out_path stri
 	set_version_readable_format(&template.Version)
 
 	template_json, err := json.MarshalIndent(template, "", " ")
-	if err != nil {
-		fmt.Println(err)
-	}
+	failOnError(err, "Failed on serializing template to json string")
 
 	err = ioutil.WriteFile(out_path+"template.json", template_json, 0644)
-	if err != nil {
-		fmt.Println(err)
+	failOnError(err, "Failed on writing to file")
+}
+
+func read_and_fill_string(prompt string, reader *bufio.Reader, to_be_filled *string) {
+	fmt.Printf(prompt)
+	value, err := reader.ReadString('\n')
+	failOnError(err, "Failed on reading value from stdin")
+	*to_be_filled = strings.TrimSpace(value)
+
+}
+
+func create_template_interactively(c *cli.Context, template_name string, out_path string) {
+	template := &Template{
+		Name:                template_name,
+		Description:         "",
+		Maintainer:          "",
+		SourcePkg:           "",
+		Repository:          "",
+		Homepage:            "",
+		Arch:                "",
+		Kind:                "",
+		Tags:                []string{},
+		Version:             Version{},
+		License:             "",
+		RuntimeDependencies: []Dependency{},
+		RuntimeSuggestions:  []Dependency{},
+		BuildDependencies:   []Dependency{},
 	}
+
+	reader := bufio.NewReader(os.Stdin)
+
+	read_and_fill_string(fmt.Sprintf("Description of '%s': ", template_name), reader, &template.Description)
+	read_and_fill_string(fmt.Sprintf("Maintainer of '%s': ", template_name), reader, &template.Maintainer)
+	read_and_fill_string(fmt.Sprintf("Source package of '%s': ", template_name), reader, &template.SourcePkg)
+	read_and_fill_string(fmt.Sprintf("Repository of '%s': ", template_name), reader, &template.Repository)
+	read_and_fill_string(fmt.Sprintf("Homepage of '%s': ", template_name), reader, &template.Homepage)
+	read_and_fill_string(fmt.Sprintf("Architecture of '%s': ", template_name), reader, &template.Arch)
+	read_and_fill_string(fmt.Sprintf("Kind of '%s': ", template_name), reader, &template.Kind)
+	read_and_fill_string(fmt.Sprintf("License of '%s': ", template_name), reader, &template.License)
+
+	fmt.Printf("Tags of '%s': ", template_name)
+	value, err := reader.ReadString('\n')
+	failOnError(err, "Failed on reading value from stdin")
+	template.Tags = strings.Split(strings.TrimSpace(value), " ")
+
+	set_version_readable_format(&template.Version)
+
+	template_json, err := json.MarshalIndent(template, "", " ")
+	failOnError(err, "Failed on serializing template to json string")
+
+	err = ioutil.WriteFile(out_path+"template.json", template_json, 0644)
+	failOnError(err, "Failed on writing to file")
 }
 
 //export lpm_entrypoint
@@ -184,4 +231,12 @@ func lpm_entrypoint(config_path_ptr *C.char, db_path_ptr *C.char, argc C.int, ar
 	}
 
 	handle_cli(args[2:])
+}
+
+func failOnError(err error, msg string) {
+	if err != nil {
+		fmt.Println("Error: ", err, msg)
+		os.Exit(1)
+
+	}
 }
