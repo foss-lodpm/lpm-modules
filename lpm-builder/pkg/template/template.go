@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	common "lpm_builder/pkg/common"
 	"os"
 	"strings"
@@ -13,7 +12,7 @@ import (
 )
 
 func readAndFillString(prompt string, reader *bufio.Reader, to_be_filled *string) {
-	fmt.Printf(prompt)
+	fmt.Print(prompt)
 	value, err := reader.ReadString('\n')
 	common.FailOnError(err, "Failed on reading value from stdin")
 	*to_be_filled = strings.TrimSpace(value)
@@ -59,7 +58,7 @@ func CreateInteractively(c *cli.Context, template_name string, out_path string) 
 	template_json, err := json.MarshalIndent(template, "", " ")
 	common.FailOnError(err, "Failed on serializing template to json string")
 
-	err = ioutil.WriteFile(out_path+"template.json", template_json, 0644)
+	err = os.WriteFile(out_path+"template.json", template_json, 0644)
 	common.FailOnError(err, "Failed on writing to file")
 }
 
@@ -86,6 +85,6 @@ func CreateDefault(c *cli.Context, template_name string, out_path string) {
 	template_json, err := json.MarshalIndent(template, "", " ")
 	common.FailOnError(err, "Failed on serializing template to json string")
 
-	err = ioutil.WriteFile(out_path+"template.json", template_json, 0644)
+	err = os.WriteFile(out_path+"template.json", template_json, 0644)
 	common.FailOnError(err, "Failed on writing to file")
 }

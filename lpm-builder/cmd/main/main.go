@@ -50,13 +50,15 @@ func handle_cli(args []string) {
 					}
 
 					if is_default && is_interactive {
-						cli.ShowSubcommandHelp(c)
+						err := cli.ShowSubcommandHelp(c)
+						common.FailOnError(err, "")
 					} else if is_default {
 						template.CreateDefault(c, template_name, out_path)
 					} else if is_interactive {
 						template.CreateInteractively(c, template_name, out_path)
 					} else {
-						cli.ShowSubcommandHelp(c)
+						err := cli.ShowSubcommandHelp(c)
+						common.FailOnError(err, "")
 					}
 
 					return nil
@@ -88,7 +90,8 @@ func handle_cli(args []string) {
 		},
 	}
 
-	app.Run(args)
+	err := app.Run(args)
+	common.FailOnError(err, "")
 
 }
 
