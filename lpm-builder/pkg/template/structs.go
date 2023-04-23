@@ -8,7 +8,7 @@ type Template struct {
 	Name                string              `json:"name"`
 	Description         string              `json:"description"`
 	Maintainer          string              `json:"maintainer"`
-	SourcePkg           string              `json:"source_pkg"`
+	Src                 string              `json:"src"`
 	Repository          string              `json:"repository"`
 	Homepage            string              `json:"homepage"`
 	Arch                string              `json:"arch"`

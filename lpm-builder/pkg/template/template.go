@@ -24,7 +24,7 @@ func CreateInteractively(c *cli.Context, template_name string, out_path string) 
 		Name:                template_name,
 		Description:         "",
 		Maintainer:          "",
-		SourcePkg:           "",
+		Src:                 "",
 		Repository:          "",
 		Homepage:            "",
 		Arch:                "",
@@ -41,7 +41,7 @@ func CreateInteractively(c *cli.Context, template_name string, out_path string) 
 
 	readAndFillString(fmt.Sprintf("Description of '%s': ", template_name), reader, &template.Description)
 	readAndFillString(fmt.Sprintf("Maintainer of '%s': ", template_name), reader, &template.Maintainer)
-	readAndFillString(fmt.Sprintf("Source package of '%s': ", template_name), reader, &template.SourcePkg)
+	readAndFillString(fmt.Sprintf("Source of '%s': ", template_name), reader, &template.Src)
 	readAndFillString(fmt.Sprintf("Repository of '%s': ", template_name), reader, &template.Repository)
 	readAndFillString(fmt.Sprintf("Homepage of '%s': ", template_name), reader, &template.Homepage)
 	readAndFillString(fmt.Sprintf("Architecture of '%s': ", template_name), reader, &template.Arch)
@@ -67,7 +67,7 @@ func CreateDefault(c *cli.Context, template_name string, out_path string) {
 		Name:                template_name,
 		Description:         "",
 		Maintainer:          "",
-		SourcePkg:           "",
+		Src:                 "",
 		Repository:          "",
 		Homepage:            "",
 		Arch:                "",
