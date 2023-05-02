@@ -51,7 +51,37 @@ func handle_cli(args []string) {
 			tmp_pkg_dir := filepath.Join("/tmp", template.Name)
 
 			err = os.Setenv("BUILD_ROOT", tmp_pkg_dir)
-			common.FailOnError(err, "Couldn't set $TMP.")
+			common.FailOnError(err, "Couldn't set $BUILD_ROOT.")
+
+			stage0Scripts := filepath.Join(template_dir, "stage0")
+
+			validateChecksumBash := `
+			function validate_checksum {
+				# Get the file path and checksum from the arguments
+				file_path="$1"
+				expected_checksum="$2"
+
+				# Calculate the actual checksum of the file
+				actual_checksum="$(sha256sum "$file_path" | awk '{print $1}')"
+
+				# Compare the actual and expected checksums
+				if [[ "$actual_checksum" == "$expected_checksum" ]]; then
+					echo "Checksum validation successful"
+					return 0
+				else
+					echo "Checksum validation failed"
+					rm "$1"
+					exit 1
+				fi
+			}`
+
+			baseScript := fmt.Sprintf(
+				`
+				set -e
+
+				%s
+				`,
+				validateChecksumBash)
 
 			err = os.MkdirAll(tmp_pkg_dir, os.ModePerm)
 			common.FailOnError(err, "Couldn't create temporary directory for building lod package.")
@@ -60,19 +90,26 @@ func handle_cli(args []string) {
 			err = os.MkdirAll(tmp_src_dir, os.ModePerm)
 			common.FailOnError(err, "Couldn't create source directory for downloading/building package source.")
 
-			cmd := exec.Command("/bin/bash", template_dir+"/init")
+			initScript := fmt.Sprintf(`
+			%s
+
+			target_script=$(<%s)
+			eval "$target_script"
+			`, baseScript, stage0Scripts+"/init")
+
+			cmd := exec.Command("bash", "-c", initScript)
 			cmd.Dir = tmp_pkg_dir
-			cmd.Run()
+			_, err = cmd.Output()
 			common.FailOnError(err, "Couldn't execute init script from template directory.")
 
-			cmd = exec.Command("/bin/bash", template_dir+"/build")
+			cmd = exec.Command("/bin/bash", stage0Scripts+"/build")
 			cmd.Dir = tmp_src_dir
-			err = cmd.Run()
+			_, err = cmd.Output()
 			common.FailOnError(err, "Couldn't execute build script from template directory.")
 
-			cmd = exec.Command("/bin/bash", template_dir+"/install_files")
+			cmd = exec.Command("/bin/bash", stage0Scripts+"/install_files")
 			cmd.Dir = tmp_pkg_dir
-			err = cmd.Run()
+			_, err = cmd.Output()
 			common.FailOnError(err, "Couldn't execute install_files script from template directory.")
 
 			// err = os.RemoveAll(tmp_pkg_dir)
