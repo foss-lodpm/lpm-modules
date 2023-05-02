@@ -2,9 +2,14 @@ package main
 
 import "C"
 import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	common "lpm_builder/pkg/common"
 	template "lpm_builder/pkg/template"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"time"
 	"unsafe"
 
@@ -28,6 +33,61 @@ func handle_cli(args []string) {
 		HelpName:  "lpm-builder",
 		Usage:     "Builder module for Lod Package Manager",
 		UsageText: "lpm -m builder [global options] command [command options] [arguments...]",
+		Action: func(c *cli.Context) error {
+			template_dir := c.String("build")
+
+			// TODO
+			// Provide custom bash functions that can be used in move_pkg script
+
+			template_json_content, err := ioutil.ReadFile(template_dir + "/template")
+			common.FailOnError(err, "Failed reading template json file")
+
+			var template template.Template
+			err = json.Unmarshal(template_json_content, &template)
+			common.FailOnError(err, "Failed reading template json file")
+
+			fmt.Printf("%#v\n++++++++++++++++\n\n", template)
+
+			tmp_pkg_dir := filepath.Join("/tmp", template.Name)
+
+			err = os.Setenv("BUILD_ROOT", tmp_pkg_dir)
+			common.FailOnError(err, "Couldn't set $TMP.")
+
+			err = os.MkdirAll(tmp_pkg_dir, os.ModePerm)
+			common.FailOnError(err, "Couldn't create temporary directory for building lod package.")
+
+			tmp_src_dir := filepath.Join(tmp_pkg_dir, "src")
+			err = os.MkdirAll(tmp_src_dir, os.ModePerm)
+			common.FailOnError(err, "Couldn't create source directory for downloading/building package source.")
+
+			cmd := exec.Command("/bin/bash", template_dir+"/init")
+			cmd.Dir = tmp_pkg_dir
+			cmd.Run()
+			common.FailOnError(err, "Couldn't execute init script from template directory.")
+
+			cmd = exec.Command("/bin/bash", template_dir+"/build")
+			cmd.Dir = tmp_src_dir
+			err = cmd.Run()
+			common.FailOnError(err, "Couldn't execute build script from template directory.")
+
+			cmd = exec.Command("/bin/bash", template_dir+"/install_files")
+			cmd.Dir = tmp_pkg_dir
+			err = cmd.Run()
+			common.FailOnError(err, "Couldn't execute install_files script from template directory.")
+
+			// err = os.RemoveAll(tmp_pkg_dir)
+			// common.FailOnError(err, "Failed cleaning the temporary files of building lod package.")
+
+			return nil
+		},
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:     "build",
+				Required: false,
+				Aliases:  []string{"b"},
+				Usage:    "Takes path of the template directory.",
+			},
+		},
 		Commands: []*cli.Command{
 			{
 				Name:        "gen",

@@ -24,11 +24,11 @@ func CreateInteractively(c *cli.Context, template_name string, out_path string) 
 		Name:                template_name,
 		Description:         "",
 		Maintainer:          "",
-		Src:                 "",
 		Repository:          "",
 		Homepage:            "",
 		Arch:                "",
 		Kind:                "",
+		FileChecksumAlgo:    "",
 		Tags:                []string{},
 		Version:             common.Version{},
 		License:             "",
@@ -41,11 +41,11 @@ func CreateInteractively(c *cli.Context, template_name string, out_path string) 
 
 	readAndFillString(fmt.Sprintf("Description of '%s': ", template_name), reader, &template.Description)
 	readAndFillString(fmt.Sprintf("Maintainer of '%s': ", template_name), reader, &template.Maintainer)
-	readAndFillString(fmt.Sprintf("Source of '%s': ", template_name), reader, &template.Src)
 	readAndFillString(fmt.Sprintf("Repository of '%s': ", template_name), reader, &template.Repository)
 	readAndFillString(fmt.Sprintf("Homepage of '%s': ", template_name), reader, &template.Homepage)
 	readAndFillString(fmt.Sprintf("Architecture of '%s': ", template_name), reader, &template.Arch)
 	readAndFillString(fmt.Sprintf("Kind of '%s': ", template_name), reader, &template.Kind)
+	readAndFillString(fmt.Sprintf("Checksum algorithm for package files of '%s': ", template_name), reader, &template.FileChecksumAlgo)
 	readAndFillString(fmt.Sprintf("License of '%s': ", template_name), reader, &template.License)
 
 	fmt.Printf("Tags of '%s': ", template_name)
@@ -67,11 +67,11 @@ func CreateDefault(c *cli.Context, template_name string, out_path string) {
 		Name:                template_name,
 		Description:         "",
 		Maintainer:          "",
-		Src:                 "",
 		Repository:          "",
 		Homepage:            "",
 		Arch:                "",
 		Kind:                "",
+		FileChecksumAlgo:    "",
 		Tags:                []string{},
 		Version:             common.Version{},
 		License:             "",
