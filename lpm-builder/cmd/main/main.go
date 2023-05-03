@@ -50,12 +50,22 @@ func handle_cli(args []string) {
 
 			tmp_pkg_dir := filepath.Join("/tmp", template.Name)
 
+			tmp_src_dir := filepath.Join(tmp_pkg_dir, "src")
+			err = os.MkdirAll(tmp_src_dir, os.ModePerm)
+			common.FailOnError(err, "Couldn't create source directory for downloading/building package source.")
+
 			err = os.Setenv("BUILD_ROOT", tmp_pkg_dir)
 			common.FailOnError(err, "Couldn't set $BUILD_ROOT.")
+
+			err = os.Setenv("SRC", tmp_src_dir)
+			common.FailOnError(err, "Couldn't set $SRC.")
 
 			stage0Scripts := filepath.Join(template_dir, "stage0")
 
 			validateChecksumBash := `
+			#!/bin/bash
+			set -e
+
 			function validate_checksum {
 				# Get the file path and checksum from the arguments
 				file_path="$1"
@@ -73,22 +83,24 @@ func handle_cli(args []string) {
 					rm "$1"
 					exit 1
 				fi
-			}`
+			}
+
+			function install_to_package {
+				src_file="$1"
+				target="$2"
+
+				install -D $src_file program/$target
+			}
+			`
 
 			baseScript := fmt.Sprintf(
 				`
-				set -e
-
 				%s
 				`,
 				validateChecksumBash)
 
 			err = os.MkdirAll(tmp_pkg_dir, os.ModePerm)
 			common.FailOnError(err, "Couldn't create temporary directory for building lod package.")
-
-			tmp_src_dir := filepath.Join(tmp_pkg_dir, "src")
-			err = os.MkdirAll(tmp_src_dir, os.ModePerm)
-			common.FailOnError(err, "Couldn't create source directory for downloading/building package source.")
 
 			initScript := fmt.Sprintf(`
 			%s
@@ -97,7 +109,7 @@ func handle_cli(args []string) {
 			eval "$target_script"
 			`, baseScript, stage0Scripts+"/init")
 
-			cmd := exec.Command("bash", "-c", initScript)
+			cmd := exec.Command("/bin/bash", "-c", initScript)
 			cmd.Dir = tmp_pkg_dir
 			_, err = cmd.Output()
 			common.FailOnError(err, "Couldn't execute init script from template directory.")
@@ -107,7 +119,14 @@ func handle_cli(args []string) {
 			_, err = cmd.Output()
 			common.FailOnError(err, "Couldn't execute build script from template directory.")
 
-			cmd = exec.Command("/bin/bash", stage0Scripts+"/install_files")
+			installFilesScript := fmt.Sprintf(`
+			%s
+
+			target_script=$(<%s)
+			eval "$target_script"
+			`, baseScript, stage0Scripts+"/install_files")
+
+			cmd = exec.Command("/bin/bash", "-c", installFilesScript)
 			cmd.Dir = tmp_pkg_dir
 			_, err = cmd.Output()
 			common.FailOnError(err, "Couldn't execute install_files script from template directory.")
