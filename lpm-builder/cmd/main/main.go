@@ -2,14 +2,10 @@ package main
 
 import "C"
 import (
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
+	"lpm_builder/pkg/builder"
 	common "lpm_builder/pkg/common"
 	template "lpm_builder/pkg/template"
 	"os"
-	"os/exec"
-	"path/filepath"
 	"time"
 	"unsafe"
 
@@ -34,105 +30,8 @@ func handle_cli(args []string) {
 		Usage:     "Builder module for Lod Package Manager",
 		UsageText: "lpm -m builder [global options] command [command options] [arguments...]",
 		Action: func(c *cli.Context) error {
-			template_dir := c.String("build")
-
-			// TODO
-			// Provide custom bash functions that can be used in move_pkg script
-
-			template_json_content, err := ioutil.ReadFile(template_dir + "/template")
-			common.FailOnError(err, "Failed reading template json file")
-
-			var template template.Template
-			err = json.Unmarshal(template_json_content, &template)
-			common.FailOnError(err, "Failed reading template json file")
-
-			fmt.Printf("%#v\n++++++++++++++++\n\n", template)
-
-			tmp_pkg_dir := filepath.Join("/tmp", template.Name)
-
-			tmp_src_dir := filepath.Join(tmp_pkg_dir, "src")
-			err = os.MkdirAll(tmp_src_dir, os.ModePerm)
-			common.FailOnError(err, "Couldn't create source directory for downloading/building package source.")
-
-			err = os.Setenv("BUILD_ROOT", tmp_pkg_dir)
-			common.FailOnError(err, "Couldn't set $BUILD_ROOT.")
-
-			err = os.Setenv("SRC", tmp_src_dir)
-			common.FailOnError(err, "Couldn't set $SRC.")
-
-			stage0Scripts := filepath.Join(template_dir, "stage0")
-
-			validateChecksumBash := `
-			#!/bin/bash
-			set -e
-
-			function validate_checksum {
-				# Get the file path and checksum from the arguments
-				file_path="$1"
-				expected_checksum="$2"
-
-				# Calculate the actual checksum of the file
-				actual_checksum="$(sha256sum "$file_path" | awk '{print $1}')"
-
-				# Compare the actual and expected checksums
-				if [[ "$actual_checksum" == "$expected_checksum" ]]; then
-					echo "Checksum validation successful"
-					return 0
-				else
-					echo "Checksum validation failed"
-					rm "$1"
-					exit 1
-				fi
-			}
-
-			function install_to_package {
-				src_file="$1"
-				target="$2"
-
-				install -D $src_file program/$target
-			}
-			`
-
-			baseScript := fmt.Sprintf(
-				`
-				%s
-				`,
-				validateChecksumBash)
-
-			err = os.MkdirAll(tmp_pkg_dir, os.ModePerm)
-			common.FailOnError(err, "Couldn't create temporary directory for building lod package.")
-
-			initScript := fmt.Sprintf(`
-			%s
-
-			target_script=$(<%s)
-			eval "$target_script"
-			`, baseScript, stage0Scripts+"/init")
-
-			cmd := exec.Command("/bin/bash", "-c", initScript)
-			cmd.Dir = tmp_pkg_dir
-			_, err = cmd.Output()
-			common.FailOnError(err, "Couldn't execute init script from template directory.")
-
-			cmd = exec.Command("/bin/bash", stage0Scripts+"/build")
-			cmd.Dir = tmp_src_dir
-			_, err = cmd.Output()
-			common.FailOnError(err, "Couldn't execute build script from template directory.")
-
-			installFilesScript := fmt.Sprintf(`
-			%s
-
-			target_script=$(<%s)
-			eval "$target_script"
-			`, baseScript, stage0Scripts+"/install_files")
-
-			cmd = exec.Command("/bin/bash", "-c", installFilesScript)
-			cmd.Dir = tmp_pkg_dir
-			_, err = cmd.Output()
-			common.FailOnError(err, "Couldn't execute install_files script from template directory.")
-
-			// err = os.RemoveAll(tmp_pkg_dir)
-			// common.FailOnError(err, "Failed cleaning the temporary files of building lod package.")
+			templateDir := c.String("build")
+			builder.StartBuilding(templateDir)
 
 			return nil
 		},

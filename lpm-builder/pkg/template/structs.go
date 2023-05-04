@@ -1,6 +1,8 @@
 package template
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	common "lpm_builder/pkg/common"
 )
 
@@ -19,4 +21,18 @@ type Template struct {
 	RuntimeDependencies []common.Dependency `json:"runtime_dependencies"`
 	RuntimeSuggestions  []common.Dependency `json:"runtime_suggestions"`
 	BuildDependencies   []common.Dependency `json:"build_dependencies"`
+}
+
+func DeserializeTemplate(templateDirPath string) Template {
+	const templateLeafPath = "/template"
+
+	var template Template
+
+	template_json_content, err := ioutil.ReadFile(templateDirPath + templateLeafPath)
+	common.FailOnError(err, "Failed reading template json file")
+
+	err = json.Unmarshal(template_json_content, &template)
+	common.FailOnError(err, "Failed reading template json file")
+
+	return template
 }
