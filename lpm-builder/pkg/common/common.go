@@ -2,7 +2,7 @@ package common
 
 import (
 	"fmt"
-	"os"
+	"log"
 )
 
 type Version struct {
@@ -18,11 +18,14 @@ type Dependency struct {
 	Version Version `json:"version"`
 }
 
-func FailOnError(err error, msg string) {
+func FailOnError(err error, v ...any) {
 	if err != nil {
-		fmt.Println("Error: ", err, msg)
-		os.Exit(1)
+		log.Fatal("Error: ", err, fmt.Sprint(v...))
 	}
+}
+
+func FatalError(v ...any) {
+	log.Fatal(fmt.Sprint(v...))
 }
 
 func SetReadableVersion(version *Version) {

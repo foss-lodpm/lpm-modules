@@ -17,9 +17,12 @@ type BuilderCtx struct {
 	TemplateDir      string
 	TmpPkgDir        string
 	TmpSrcDir        string
+	TmpMetaDir       string
+	TmpProgramDir    string
 	Stage0ScriptsDir string
 	Stage1ScriptsDir string
 	TemplateFields   template.Template
+	PkgFilesData     []File
 }
 
 func prepare(templateDir string) BuilderCtx {
@@ -32,13 +35,18 @@ func prepare(templateDir string) BuilderCtx {
 
 	ctx.TmpPkgDir = filepath.Join(TMP_ROOT_PATH, ctx.TemplateFields.Name)
 	ctx.TmpSrcDir = filepath.Join(ctx.TmpPkgDir, "src")
+	ctx.TmpMetaDir = filepath.Join(ctx.TmpPkgDir, "meta")
+	ctx.TmpProgramDir = filepath.Join(ctx.TmpPkgDir, "program")
 	ctx.Stage0ScriptsDir = filepath.Join(ctx.TemplateDir, "stage0")
 	ctx.Stage1ScriptsDir = filepath.Join(ctx.TemplateDir, "stage1")
 
-	err := os.MkdirAll(ctx.TmpSrcDir, os.ModePerm)
-	common.FailOnError(err, "Couldn't create source directory for downloading/building package source.")
+	for _, dir := range []string{ctx.TmpMetaDir, ctx.TmpProgramDir, ctx.TmpSrcDir} {
+		err := os.MkdirAll(dir, os.ModePerm)
+		common.FailOnError(err, "Couldn't create "+dir+" directory.")
 
-	err = os.Setenv(BUILD_ROOT_ENV_TAG, ctx.TmpPkgDir)
+	}
+
+	err := os.Setenv(BUILD_ROOT_ENV_TAG, ctx.TmpPkgDir)
 	common.FailOnError(err, "Couldn't set $"+BUILD_ROOT_ENV_TAG)
 
 	err = os.Setenv(SRC_ENV_TAG, ctx.TmpSrcDir)
@@ -55,7 +63,9 @@ func cleanup(ctx BuilderCtx) {
 func StartBuilding(templateDir string) {
 	ctx := prepare(templateDir)
 
-	executeStage0(ctx)
+	executeStage0(&ctx)
+	computeChecksums(&ctx)
+	generateMetaFiles(&ctx)
 
 	// TODO
 	// cleanup(ctx)

@@ -59,7 +59,7 @@ func PrepareScript(stage0Path string, scriptType ScriptType) string {
 	return preparedScript
 }
 
-func executeStage0(ctx BuilderCtx) {
+func executeStage0(ctx *BuilderCtx) {
 	scripts := [][2]string{
 		{Init, ctx.TmpPkgDir},
 		{Build, ctx.TmpSrcDir},
