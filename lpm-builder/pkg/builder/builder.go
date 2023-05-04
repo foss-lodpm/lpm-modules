@@ -66,7 +66,8 @@ func StartBuilding(templateDir string) {
 	executeStage0(&ctx)
 	computeChecksums(&ctx)
 	generateMetaFiles(&ctx)
-
 	// TODO
+	// marshalAndWriteSystemJson(ctx)
+	// Pack .lod file to current dir
 	// cleanup(ctx)
 }
