@@ -12,11 +12,9 @@ import (
 )
 
 func readAndFillString(prompt string, reader *bufio.Reader, to_be_filled *string) {
-	fmt.Print(prompt)
 	value, err := reader.ReadString('\n')
 	common.FailOnError(err, "Failed on reading value from stdin")
 	*to_be_filled = strings.TrimSpace(value)
-
 }
 
 func CreateInteractively(c *cli.Context, template_name string, out_path string) {
@@ -48,14 +46,13 @@ func CreateInteractively(c *cli.Context, template_name string, out_path string) 
 	readAndFillString(fmt.Sprintf("Checksum algorithm for package files of '%s': ", template_name), reader, &template.FileChecksumAlgo)
 	readAndFillString(fmt.Sprintf("License of '%s': ", template_name), reader, &template.License)
 
-	fmt.Printf("Tags of '%s': ", template_name)
 	value, err := reader.ReadString('\n')
 	common.FailOnError(err, "Failed on reading value from stdin")
 	template.Tags = strings.Split(strings.TrimSpace(value), " ")
 
 	common.SetReadableVersion(&template.Version)
 
-	template_json, err := json.MarshalIndent(template, "", " ")
+	template_json, err := json.MarshalIndent(template, "", "\t")
 	common.FailOnError(err, "Failed on serializing template to json string")
 
 	err = os.WriteFile(out_path+"template.json", template_json, 0644)
@@ -82,7 +79,7 @@ func CreateDefault(c *cli.Context, template_name string, out_path string) {
 
 	common.SetReadableVersion(&template.Version)
 
-	template_json, err := json.MarshalIndent(template, "", " ")
+	template_json, err := json.MarshalIndent(template, "", "\t")
 	common.FailOnError(err, "Failed on serializing template to json string")
 
 	err = os.WriteFile(out_path+"template.json", template_json, 0644)

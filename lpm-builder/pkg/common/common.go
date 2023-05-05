@@ -5,6 +5,8 @@ import (
 	"log"
 )
 
+var Logger *log.Logger
+
 type System struct {
 	BuilderVersion         Version `json:"builder_version"`
 	MinSupportedLpmVersion Version `json:"min_supported_lpm_version"`
@@ -12,9 +14,9 @@ type System struct {
 
 type Version struct {
 	ReadableFormat string  `json:"readable_format"`
-	Major          int     `json:"major"`
-	Minor          int     `json:"minor"`
-	Patch          int     `json:"patch"`
+	Major          uint    `json:"major"`
+	Minor          uint    `json:"minor"`
+	Patch          uint    `json:"patch"`
 	Tag            *string `json:"tag"`
 }
 
@@ -62,4 +64,13 @@ func SetReadableVersion(version *Version) {
 
 	version.ReadableFormat = readable_format
 
+}
+
+func Contains[T comparable](s []T, e T) bool {
+    for _, v := range s {
+        if v == e {
+            return true
+        }
+    }
+    return false
 }

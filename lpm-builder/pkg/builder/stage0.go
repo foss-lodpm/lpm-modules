@@ -71,6 +71,8 @@ func executeStage0(ctx *BuilderCtx) {
 		script := tuple[0]
 		dir := tuple[1]
 
+		common.Logger.Printf("Executing stage0/%s script", script)
+
 		cmd := exec.Command("/bin/bash", "-c", PrepareScript(ctx.Stage0ScriptsDir, ScriptType(script)))
 		cmd.Dir = dir
 		_, err := cmd.Output()

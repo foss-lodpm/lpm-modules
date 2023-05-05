@@ -21,6 +21,23 @@ type File struct {
 	Checksum          string `json:"checksum"`
 }
 
+type Meta struct {
+	Name          string              `json:"name"`
+	Description   string              `json:"description"`
+	Maintainer    string              `json:"maintainer"`
+	Repository    string              `json:"repository"`
+	PkgRepository string              `json:"pkg_repository"`
+	Homepage      string              `json:"homepage"`
+	Arch          string              `json:"arch"`
+	Kind          string              `json:"kind"`
+	InstalledSize uint                `json:"installed_size"`
+	Tags          []string            `json:"tags"`
+	Version       common.Version      `json:"version"`
+	License       string              `json:"license"`
+	Dependencies  []common.Dependency `json:"dependencies"`
+	Suggestions   []common.Dependency `json:"suggestions"`
+}
+
 func getHashOfFile(filePath string, hashAlgorithm string) string {
 	file, err := os.Open(filePath)
 	common.FailOnError(err)
@@ -45,17 +62,21 @@ func getHashOfFile(filePath string, hashAlgorithm string) string {
 	return fmt.Sprintf("%x", hash.Sum(nil))
 }
 
-func computeChecksums(ctx *BuilderCtx) {
+func computeChecksumsAndInstallSize(ctx *BuilderCtx) {
 
 	err := filepath.Walk(ctx.TmpProgramDir, func(path string, info os.FileInfo, err error) error {
 		common.FailOnError(err, "Failed while searching files in "+ctx.TmpProgramDir)
 
 		if !info.IsDir() {
+			ctx.InstallSize += uint(info.Size() / 1024)
+
 			file := File{
 				Path:              strings.Split(path, "/program/")[1],
 				ChecksumAlgorithm: ctx.TemplateFields.FileChecksumAlgo,
 				Checksum:          getHashOfFile(path, ctx.TemplateFields.FileChecksumAlgo),
 			}
+
+			common.Logger.Printf("computed %s as %s checksum for file %s", file.Checksum, file.ChecksumAlgorithm, file.Path)
 
 			ctx.PkgFilesData = append(ctx.PkgFilesData, file)
 		}
@@ -66,11 +87,43 @@ func computeChecksums(ctx *BuilderCtx) {
 	common.FailOnError(err, "filepath.Walk failed for "+ctx.TmpProgramDir)
 }
 
+func genMetaFromTemplateFields(ctx *BuilderCtx) Meta {
+	var meta Meta
+
+	meta.Name = ctx.TemplateFields.Name
+	meta.Description = ctx.TemplateFields.Description
+	meta.Maintainer = ctx.TemplateFields.Maintainer
+	meta.Repository = ctx.TemplateFields.Repository
+	meta.PkgRepository = ctx.TemplateFields.PkgRepository
+	meta.Homepage = ctx.TemplateFields.Homepage
+	meta.Arch = ctx.TemplateFields.Arch
+	meta.Kind = ctx.TemplateFields.Kind
+	meta.InstalledSize = ctx.InstallSize
+	meta.Tags = ctx.TemplateFields.Tags
+	meta.Version = ctx.TemplateFields.Version
+	meta.License = ctx.TemplateFields.License
+	meta.Dependencies = ctx.TemplateFields.RuntimeDependencies
+	meta.Suggestions = ctx.TemplateFields.RuntimeSuggestions
+
+	return meta
+}
+
 func marshalAndWriteFilesJson(ctx *BuilderCtx) {
-	file, err := json.MarshalIndent(ctx.PkgFilesData, "", " ")
+	file, err := json.MarshalIndent(ctx.PkgFilesData, "", "\t")
 	common.FailOnError(err, "Failed on serializing ctx.PkgFilesData")
 
+	common.Logger.Println("Writing meta/files.json")
 	filesJsonPath := filepath.Join(ctx.TmpMetaDir, "files.json")
+	err = ioutil.WriteFile(filesJsonPath, file, 0644)
+	common.FailOnError(err)
+}
+
+func marshalAndWriteMetaJson(meta Meta, metaDir string) {
+	file, err := json.MarshalIndent(meta, "", "\t")
+	common.FailOnError(err, "Failed on serializing Meta fields")
+
+	common.Logger.Println("Writing meta/meta.json")
+	filesJsonPath := filepath.Join(metaDir, "meta.json")
 	err = ioutil.WriteFile(filesJsonPath, file, 0644)
 	common.FailOnError(err)
 }
@@ -78,6 +131,6 @@ func marshalAndWriteFilesJson(ctx *BuilderCtx) {
 func generateMetaFiles(ctx *BuilderCtx) {
 	marshalAndWriteFilesJson(ctx)
 
-	// TODO
-	// marshalAndWriteMetaJson(ctx)
+	meta := genMetaFromTemplateFields(ctx)
+	marshalAndWriteMetaJson(meta, ctx.TmpMetaDir)
 }

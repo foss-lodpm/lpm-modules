@@ -2,6 +2,7 @@ package main
 
 import "C"
 import (
+	"log"
 	"lpm_builder/pkg/builder"
 	common "lpm_builder/pkg/common"
 	template "lpm_builder/pkg/template"
@@ -117,6 +118,9 @@ func lpm_entrypoint(config_path_ptr *C.char, db_path_ptr *C.char, argc C.int, ar
 	//
 	// 	_ = config_path
 	// 	_ = db_path
+
+	// initialize logger
+	common.Logger = log.New(os.Stdout, "[lpm-builder]: ", log.Ldate|log.Ltime)
 
 	var args []string
 	for i := 0; i < int(argc); i++ {

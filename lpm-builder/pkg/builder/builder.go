@@ -26,14 +26,15 @@ type BuilderCtx struct {
 	TemplateFields   template.Template
 	PkgFilesData     []File
 	System           common.System
+	InstallSize      uint
 }
 
 func prepare(templateDir string) BuilderCtx {
+	common.Logger.Println("Preparing for building")
+
 	var ctx BuilderCtx
 	ctx.TemplateDir = templateDir
 
-	// TODO
-	// validate deserialized template fields
 	ctx.TemplateFields = template.DeserializeTemplate(ctx.TemplateDir)
 
 	ctx.System.BuilderVersion = common.BuilderVersion
@@ -62,9 +63,10 @@ func prepare(templateDir string) BuilderCtx {
 }
 
 func marshalAndWriteSystemJson(ctx *BuilderCtx) {
-	file, err := json.MarshalIndent(ctx.System, "", " ")
+	file, err := json.MarshalIndent(ctx.System, "", "\t")
 	common.FailOnError(err, "Failed on serializing ctx.System")
 
+	common.Logger.Println("Writing system.json")
 	filesJsonPath := filepath.Join(ctx.TmpPkgDir, "system.json")
 	err = ioutil.WriteFile(filesJsonPath, file, 0644)
 	common.FailOnError(err)
@@ -79,7 +81,7 @@ func StartBuilding(templateDir string) {
 	ctx := prepare(templateDir)
 
 	executeStage0(&ctx)
-	computeChecksums(&ctx)
+	computeChecksumsAndInstallSize(&ctx)
 	generateMetaFiles(&ctx)
 	marshalAndWriteSystemJson(&ctx)
 	// TODO

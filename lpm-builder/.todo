@@ -1,2 +1,0 @@
-- validate package meta fields(e.g pkg name can't include ':')
-- print logs
