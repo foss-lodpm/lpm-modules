@@ -1,6 +1,8 @@
 package builder
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"lpm_builder/pkg/common"
 	"lpm_builder/pkg/template"
 	"os"
@@ -23,6 +25,7 @@ type BuilderCtx struct {
 	Stage1ScriptsDir string
 	TemplateFields   template.Template
 	PkgFilesData     []File
+	System           common.System
 }
 
 func prepare(templateDir string) BuilderCtx {
@@ -32,6 +35,9 @@ func prepare(templateDir string) BuilderCtx {
 	// TODO
 	// validate deserialized template fields
 	ctx.TemplateFields = template.DeserializeTemplate(ctx.TemplateDir)
+
+	ctx.System.BuilderVersion = common.BuilderVersion
+	ctx.System.MinSupportedLpmVersion = common.MinSupportedLpmVersion
 
 	ctx.TmpPkgDir = filepath.Join(TMP_ROOT_PATH, ctx.TemplateFields.Name)
 	ctx.TmpSrcDir = filepath.Join(ctx.TmpPkgDir, "src")
@@ -55,6 +61,15 @@ func prepare(templateDir string) BuilderCtx {
 	return ctx
 }
 
+func marshalAndWriteSystemJson(ctx *BuilderCtx) {
+	file, err := json.MarshalIndent(ctx.System, "", " ")
+	common.FailOnError(err, "Failed on serializing ctx.System")
+
+	filesJsonPath := filepath.Join(ctx.TmpPkgDir, "system.json")
+	err = ioutil.WriteFile(filesJsonPath, file, 0644)
+	common.FailOnError(err)
+}
+
 func cleanup(ctx BuilderCtx) {
 	err := os.RemoveAll(ctx.TmpPkgDir)
 	common.FailOnError(err, "Failed cleaning the temporary files of building lod package.")
@@ -66,8 +81,8 @@ func StartBuilding(templateDir string) {
 	executeStage0(&ctx)
 	computeChecksums(&ctx)
 	generateMetaFiles(&ctx)
+	marshalAndWriteSystemJson(&ctx)
 	// TODO
-	// marshalAndWriteSystemJson(ctx)
 	// Pack .lod file to current dir
 	// cleanup(ctx)
 }

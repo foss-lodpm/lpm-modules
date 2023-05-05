@@ -5,6 +5,11 @@ import (
 	"log"
 )
 
+type System struct {
+	BuilderVersion         Version `json:"builder_version"`
+	MinSupportedLpmVersion Version `json:"min_supported_lpm_version"`
+}
+
 type Version struct {
 	ReadableFormat string  `json:"readable_format"`
 	Major          int     `json:"major"`
@@ -16,6 +21,26 @@ type Version struct {
 type Dependency struct {
 	Name    string  `json:"name"`
 	Version Version `json:"version"`
+}
+
+var BuilderVersion = Version{
+	ReadableFormat: "1.0.0-beta",
+	Major:          1,
+	Minor:          0,
+	Patch:          0,
+	Tag:            StringPtr("beta"),
+}
+
+var MinSupportedLpmVersion = Version{
+	ReadableFormat: "0.0.1-alpha",
+	Major:          0,
+	Minor:          0,
+	Patch:          1,
+	Tag:            StringPtr("alpha"),
+}
+
+func StringPtr(s string) *string {
+	return &s
 }
 
 func FailOnError(err error, v ...any) {
