@@ -59,6 +59,16 @@ func prepare(templateDir string) BuilderCtx {
 	err = os.Setenv(SRC_ENV_TAG, ctx.TmpSrcDir)
 	common.FailOnError(err, "Couldn't set $"+SRC_ENV_TAG)
 
+	preInstallSrcPath := filepath.Join(ctx.Stage1ScriptsDir, "pre_install")
+	preInstallDestPath := filepath.Join(ctx.TmpPkgDir, "pre_install")
+	err = common.CopyIfExists(preInstallSrcPath, preInstallDestPath)
+	common.FailOnError(err)
+
+	postInstallSrcPath := filepath.Join(ctx.Stage1ScriptsDir, "post_install")
+	postInstallDestPath := filepath.Join(ctx.TmpPkgDir, "post_install")
+	err = common.CopyIfExists(postInstallSrcPath, postInstallDestPath)
+	common.FailOnError(err)
+
 	return ctx
 }
 

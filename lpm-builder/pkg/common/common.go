@@ -2,7 +2,9 @@ package common
 
 import (
 	"fmt"
+	"io"
 	"log"
+	"os"
 )
 
 var Logger *log.Logger
@@ -67,10 +69,39 @@ func SetReadableVersion(version *Version) {
 }
 
 func Contains[T comparable](s []T, e T) bool {
-    for _, v := range s {
-        if v == e {
-            return true
-        }
-    }
-    return false
+	for _, v := range s {
+		if v == e {
+			return true
+		}
+	}
+	return false
+}
+
+func CopyIfExists(srcPath, destPath string) error {
+	srcFile, err := os.Open(srcPath)
+
+	if err != nil {
+		if os.IsNotExist(err) {
+			Logger.Printf("File '%s' does not exist, ignoring copying it", srcPath)
+			return nil
+		}
+		return err
+	}
+
+	defer srcFile.Close()
+
+	// Create the destination file
+	destFile, err := os.Create(destPath)
+	if err != nil {
+		return err
+	}
+	defer destFile.Close()
+
+	// Copy the contents of the source file to the destination file
+	_, err = io.Copy(destFile, srcFile)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
