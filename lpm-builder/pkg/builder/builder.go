@@ -88,7 +88,18 @@ func StartBuilding(templateDir string) {
 	computeChecksumsAndInstallSize(&ctx)
 	generateMetaFiles(&ctx)
 	marshalAndWriteSystemJson(&ctx)
-	// TODO
-	// Pack .lod file to current dir
-	// cleanup(ctx)
+
+	// Get the current working directory
+	workingDir, err := os.Getwd()
+	common.FailOnError(err, "Failed on getting current path.")
+
+	// Get the absolute path of the current working directory
+	workingDir, err = filepath.Abs(workingDir)
+	common.FailOnError(err)
+
+	lodOutputPath := filepath.Join(workingDir, ctx.TemplateFields.Name+".lod")
+
+	PackLodFile(ctx.TmpPkgDir, []string{"./meta", "./program", "./scripts", "system.json"}, lodOutputPath)
+
+	cleanup(ctx)
 }

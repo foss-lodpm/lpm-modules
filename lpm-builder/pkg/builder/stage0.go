@@ -3,6 +3,7 @@ package builder
 import (
 	"fmt"
 	"lpm_builder/pkg/common"
+	"os"
 	"os/exec"
 	"path/filepath"
 )
@@ -42,10 +43,8 @@ const (
 	PostInstallFiles = "post_install_files"
 )
 
-type ScriptType string
-
-func PrepareScript(stage0Path string, scriptType ScriptType) string {
-	script := filepath.Join(stage0Path, string(scriptType))
+func PrepareScript(stage0Path string, script string) string {
+	s := filepath.Join(stage0Path, script)
 	preparedScript := fmt.Sprintf(`
 		#!/bin/bash
 		set -e
@@ -54,29 +53,28 @@ func PrepareScript(stage0Path string, scriptType ScriptType) string {
 
 		target_script=$(<%s)
 		eval "$target_script"
-	`, BuiltInFunctions, script)
+	`, BuiltInFunctions, s)
 
 	return preparedScript
 }
 
+func execute(scriptPath string, script string, executeIn string) {
+	common.Logger.Printf("Executing stage0/%s script", script)
+
+	cmd := exec.Command("/bin/bash", "-c", PrepareScript(scriptPath, script))
+	cmd.Dir = executeIn
+	_, err := cmd.Output()
+	common.FailOnError(err, "Couldn't execute "+script+" script from template directory.")
+
+}
+
 func executeStage0(ctx *BuilderCtx) {
-	scripts := [][2]string{
-		{Init, ctx.TmpPkgDir},
-		{Build, ctx.TmpSrcDir},
-		{InstallFiles, ctx.TmpPkgDir},
-		{PostInstallFiles, ctx.TmpPkgDir},
+	execute(ctx.Stage0ScriptsDir, Init, ctx.TmpPkgDir)
+	execute(ctx.Stage0ScriptsDir, Build, ctx.TmpSrcDir)
+	execute(ctx.Stage0ScriptsDir, InstallFiles, ctx.TmpPkgDir)
+
+	// since post_install_files is optional, check if it exists before the execution
+	if _, err := os.Stat(filepath.Join(ctx.Stage0ScriptsDir, PostInstallFiles)); err == nil {
+		execute(ctx.Stage0ScriptsDir, PostInstallFiles, ctx.TmpPkgDir)
 	}
-
-	for _, tuple := range scripts {
-		script := tuple[0]
-		dir := tuple[1]
-
-		common.Logger.Printf("Executing stage0/%s script", script)
-
-		cmd := exec.Command("/bin/bash", "-c", PrepareScript(ctx.Stage0ScriptsDir, ScriptType(script)))
-		cmd.Dir = dir
-		_, err := cmd.Output()
-		common.FailOnError(err, "Couldn't execute "+script+" script from template directory.")
-	}
-
 }

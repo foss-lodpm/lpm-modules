@@ -49,7 +49,7 @@ func StringPtr(s string) *string {
 
 func FailOnError(err error, v ...any) {
 	if err != nil {
-		log.Fatal("Error: ", err, fmt.Sprint(v...))
+		log.Fatal("Error: ", err, "\n", fmt.Sprint(v...))
 	}
 }
 
