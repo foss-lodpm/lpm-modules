@@ -21,6 +21,7 @@ type BuilderCtx struct {
 	TmpSrcDir        string
 	TmpMetaDir       string
 	TmpProgramDir    string
+	TmpScriptsDir    string
 	Stage0ScriptsDir string
 	Stage1ScriptsDir string
 	TemplateFields   template.Template
@@ -44,10 +45,11 @@ func prepare(templateDir string) BuilderCtx {
 	ctx.TmpSrcDir = filepath.Join(ctx.TmpPkgDir, "src")
 	ctx.TmpMetaDir = filepath.Join(ctx.TmpPkgDir, "meta")
 	ctx.TmpProgramDir = filepath.Join(ctx.TmpPkgDir, "program")
+	ctx.TmpScriptsDir = filepath.Join(ctx.TmpPkgDir, "scripts")
 	ctx.Stage0ScriptsDir = filepath.Join(ctx.TemplateDir, "stage0")
 	ctx.Stage1ScriptsDir = filepath.Join(ctx.TemplateDir, "stage1")
 
-	for _, dir := range []string{ctx.TmpMetaDir, ctx.TmpProgramDir, ctx.TmpSrcDir} {
+	for _, dir := range []string{ctx.TmpMetaDir, ctx.TmpProgramDir, ctx.TmpSrcDir, ctx.TmpScriptsDir} {
 		err := os.MkdirAll(dir, os.ModePerm)
 		common.FailOnError(err, "Couldn't create "+dir+" directory.")
 
@@ -58,16 +60,6 @@ func prepare(templateDir string) BuilderCtx {
 
 	err = os.Setenv(SRC_ENV_TAG, ctx.TmpSrcDir)
 	common.FailOnError(err, "Couldn't set $"+SRC_ENV_TAG)
-
-	preInstallSrcPath := filepath.Join(ctx.Stage1ScriptsDir, "pre_install")
-	preInstallDestPath := filepath.Join(ctx.TmpPkgDir, "pre_install")
-	err = common.CopyIfExists(preInstallSrcPath, preInstallDestPath)
-	common.FailOnError(err)
-
-	postInstallSrcPath := filepath.Join(ctx.Stage1ScriptsDir, "post_install")
-	postInstallDestPath := filepath.Join(ctx.TmpPkgDir, "post_install")
-	err = common.CopyIfExists(postInstallSrcPath, postInstallDestPath)
-	common.FailOnError(err)
 
 	return ctx
 }
@@ -89,6 +81,8 @@ func cleanup(ctx BuilderCtx) {
 
 func StartBuilding(templateDir string) {
 	ctx := prepare(templateDir)
+
+	CopyProvidedStage1Scripts(&ctx)
 
 	executeStage0(&ctx)
 	computeChecksumsAndInstallSize(&ctx)
