@@ -19,20 +19,25 @@ func readAndFillString(prompt string, reader *bufio.Reader, to_be_filled *string
 
 func CreateInteractively(c *cli.Context, template_name string, out_path string) {
 	template := &Template{
-		Name:                template_name,
-		Description:         "",
-		Maintainer:          "",
-		Repository:          "",
-		Homepage:            "",
-		Arch:                "",
-		Kind:                "",
-		FileChecksumAlgo:    "",
-		Tags:                []string{},
-		Version:             common.Version{},
-		License:             "",
-		RuntimeDependencies: []common.Dependency{},
-		RuntimeSuggestions:  []common.Dependency{},
-		BuildDependencies:   []common.Dependency{},
+		Name:             template_name,
+		Description:      "",
+		Maintainer:       "",
+		Repository:       "",
+		Homepage:         "",
+		Arch:             "",
+		Kind:             "",
+		FileChecksumAlgo: "",
+		Tags:             []string{},
+		Version:          common.Version{},
+		License:          "",
+		MandatoryDependencies: Dependencies{
+			Build:   []common.Dependency{},
+			Runtime: []common.Dependency{},
+		},
+		SuggestedDependencies: Dependencies{
+			Build:   []common.Dependency{},
+			Runtime: []common.Dependency{},
+		},
 	}
 
 	reader := bufio.NewReader(os.Stdin)
@@ -61,20 +66,25 @@ func CreateInteractively(c *cli.Context, template_name string, out_path string) 
 
 func CreateDefault(c *cli.Context, template_name string, out_path string) {
 	template := &Template{
-		Name:                template_name,
-		Description:         "",
-		Maintainer:          "",
-		Repository:          "",
-		Homepage:            "",
-		Arch:                "",
-		Kind:                "",
-		FileChecksumAlgo:    "",
-		Tags:                []string{},
-		Version:             common.Version{},
-		License:             "",
-		RuntimeDependencies: []common.Dependency{},
-		RuntimeSuggestions:  []common.Dependency{},
-		BuildDependencies:   []common.Dependency{},
+		Name:             template_name,
+		Description:      "",
+		Maintainer:       "",
+		Repository:       "",
+		Homepage:         "",
+		Arch:             "",
+		Kind:             "",
+		FileChecksumAlgo: "",
+		Tags:             []string{},
+		Version:          common.Version{},
+		License:          "",
+		MandatoryDependencies: Dependencies{
+			Build:   []common.Dependency{},
+			Runtime: []common.Dependency{},
+		},
+		SuggestedDependencies: Dependencies{
+			Build:   []common.Dependency{},
+			Runtime: []common.Dependency{},
+		},
 	}
 
 	common.SetReadableVersion(&template.Version)

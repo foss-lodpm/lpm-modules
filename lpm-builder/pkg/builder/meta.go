@@ -103,8 +103,8 @@ func genMetaFromTemplateFields(ctx *BuilderCtx) Meta {
 	meta.Tags = ctx.TemplateFields.Tags
 	meta.Version = ctx.TemplateFields.Version
 	meta.License = ctx.TemplateFields.License
-	meta.Dependencies = ctx.TemplateFields.RuntimeDependencies
-	meta.Suggestions = ctx.TemplateFields.RuntimeSuggestions
+	meta.Dependencies = ctx.TemplateFields.MandatoryDependencies.Runtime
+	meta.Suggestions = ctx.TemplateFields.SuggestedDependencies.Runtime
 
 	return meta
 }

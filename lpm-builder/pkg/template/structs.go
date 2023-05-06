@@ -10,21 +10,25 @@ import (
 )
 
 type Template struct {
-	Name                string              `json:"name"`
-	Description         string              `json:"description"`
-	Maintainer          string              `json:"maintainer"`
-	Repository          string              `json:"repository"`
-	PkgRepository       string              `json:"pkg_repository"`
-	Homepage            string              `json:"homepage"`
-	Arch                string              `json:"arch"`
-	Kind                string              `json:"kind"`
-	FileChecksumAlgo    string              `json:"file_checksum_algo"`
-	Tags                []string            `json:"tags"`
-	Version             common.Version      `json:"version"`
-	License             string              `json:"license"`
-	RuntimeDependencies []common.Dependency `json:"runtime_dependencies"`
-	RuntimeSuggestions  []common.Dependency `json:"runtime_suggestions"`
-	BuildDependencies   []common.Dependency `json:"build_dependencies"`
+	Name                  string         `json:"name"`
+	Description           string         `json:"description"`
+	Maintainer            string         `json:"maintainer"`
+	Repository            string         `json:"repository"`
+	PkgRepository         string         `json:"pkg_repository"`
+	Homepage              string         `json:"homepage"`
+	Arch                  string         `json:"arch"`
+	Kind                  string         `json:"kind"`
+	FileChecksumAlgo      string         `json:"file_checksum_algo"`
+	Tags                  []string       `json:"tags"`
+	Version               common.Version `json:"version"`
+	License               string         `json:"license"`
+	MandatoryDependencies Dependencies   `json:"mandatory_dependencies"`
+	SuggestedDependencies Dependencies   `json:"suggested_dependencies"`
+}
+
+type Dependencies struct {
+	Build   []common.Dependency `json:"build"`
+	Runtime []common.Dependency `json:"runtime"`
 }
 
 func (template *Template) validate() error {
@@ -97,7 +101,16 @@ func DeserializeTemplate(templateDirPath string) Template {
 
 	const templateLeafPath = "/template"
 
-	var template Template
+	var template = Template{
+		MandatoryDependencies: Dependencies{
+			Build:   []common.Dependency{},
+			Runtime: []common.Dependency{},
+		},
+		SuggestedDependencies: Dependencies{
+			Build:   []common.Dependency{},
+			Runtime: []common.Dependency{},
+		},
+	}
 
 	template_json_content, err := ioutil.ReadFile(templateDirPath + templateLeafPath)
 	common.FailOnError(err, "Failed reading template json file")
