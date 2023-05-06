@@ -98,8 +98,7 @@ func StartBuilding(templateDir string) {
 	common.FailOnError(err)
 
 	lodOutputPath := filepath.Join(workingDir, ctx.TemplateFields.Name+".lod")
-
-	PackLodFile(ctx.TmpPkgDir, []string{"./meta", "./program", "./scripts", "system.json"}, lodOutputPath)
+	PackLodFile(ctx.TmpPkgDir, lodOutputPath)
 
 	cleanup(ctx)
 }
