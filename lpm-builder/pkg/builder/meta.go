@@ -64,6 +64,7 @@ func getHashOfFile(filePath string, hashAlgorithm string) string {
 
 func computeChecksumsAndInstallSize(ctx *BuilderCtx) {
 
+	common.Logger.Println(ctx.TmpProgramDir)
 	err := filepath.Walk(ctx.TmpProgramDir, func(path string, info os.FileInfo, err error) error {
 		common.FailOnError(err, "Failed while searching files in "+ctx.TmpProgramDir)
 

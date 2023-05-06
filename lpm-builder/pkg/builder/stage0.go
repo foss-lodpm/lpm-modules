@@ -32,7 +32,7 @@ function install_to_package {
 	src_file="$1"
 	target="$2"
 
-	install -D $src_file program/$target
+	install -D $SRC/$src_file program/$target
 }
 `
 
@@ -71,7 +71,7 @@ func execute(scriptPath string, script string, executeIn string) {
 func executeStage0(ctx *BuilderCtx) {
 	execute(ctx.Stage0ScriptsDir, Init, ctx.TmpPkgDir)
 	execute(ctx.Stage0ScriptsDir, Build, ctx.TmpSrcDir)
-	execute(ctx.Stage0ScriptsDir, InstallFiles, ctx.TmpSrcDir)
+	execute(ctx.Stage0ScriptsDir, InstallFiles, ctx.TmpPkgDir)
 
 	// since post_install_files is optional, check if it exists before the execution
 	if _, err := os.Stat(filepath.Join(ctx.Stage0ScriptsDir, PostInstallFiles)); err == nil {
