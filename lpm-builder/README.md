@@ -1,7 +1,6 @@
-## lpm-builder - work in progress
-
+## lpm-builder
 building the module
 
 ```sh
-    go build -o liblpm_builder.so -buildmode=c-shared cmd/main/main.go
+make build
 ```
