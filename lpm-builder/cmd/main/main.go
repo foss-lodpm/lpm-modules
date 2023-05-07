@@ -7,6 +7,7 @@ import (
 	common "lpm_builder/pkg/common"
 	template "lpm_builder/pkg/template"
 	"os"
+	"path/filepath"
 	"time"
 	"unsafe"
 
@@ -32,6 +33,9 @@ func handle_cli(args []string) {
 		UsageText: "lpm -m builder [global options] command [command options] [arguments...]",
 		Action: func(c *cli.Context) error {
 			templateDir := c.String("build")
+			templateDir, err := filepath.Abs(templateDir)
+			common.FailOnError(err)
+
 			builder.StartBuilding(templateDir)
 
 			return nil
