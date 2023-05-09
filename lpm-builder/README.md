@@ -1,6 +1,6 @@
 ## lpm-builder
 
-lpm-builder is a dynamic module for the lod package manager that allows users to create LOD packages by packing software using a set of template files. This documentation explains how to use the lpm-builder module and provides details on the supported build template files.
+lpm-builder is a dynamic module for lod package manager that allows users to create LOD packages by packing software using a set of template files. This documentation explains how to use the lpm-builder module and provides details on the supported build template files.
 
 
 ## Building lpm-builder from Source
