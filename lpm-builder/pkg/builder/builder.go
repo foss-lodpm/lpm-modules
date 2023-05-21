@@ -97,8 +97,12 @@ func StartBuilding(templateDir string) {
 	workingDir, err = filepath.Abs(workingDir)
 	common.FailOnError(err)
 
+	common.Logger.Println("Packing and generating the package")
 	lodOutputPath := filepath.Join(workingDir, ctx.TemplateFields.Name+".lod")
 	PackLodFile(ctx.TmpPkgDir, lodOutputPath)
+
+	common.Logger.Println("Writing index patch")
+	GenerateIndexPatch(&ctx)
 
 	cleanup(ctx)
 }
