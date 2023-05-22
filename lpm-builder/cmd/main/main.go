@@ -95,11 +95,8 @@ func handle_cli(args []string) {
 }
 
 //export lpm_entrypoint
-func lpm_entrypoint(config_path_ptr *C.char, db_path_ptr *C.char, argc C.int, argv **C.char) {
-	// 	config_path := C.GoString(config_path_ptr)
+func lpm_entrypoint(db_path_ptr *C.char, argc C.int, argv **C.char) {
 	// 	db_path := C.GoString(db_path_ptr)
-	//
-	// 	_ = config_path
 	// 	_ = db_path
 
 	// initialize logger
