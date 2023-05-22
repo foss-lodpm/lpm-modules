@@ -56,9 +56,6 @@ func handle_cli(args []string) {
 				UsageText:   "lpm -m builder --generate(or -g) --name(or -n) {package_name}",
 				Description: "Mostly used to bootstrap providing package build files/templates.",
 				Action: func(c *cli.Context) error {
-					is_default := c.Bool("default")
-					is_interactive := c.Bool("interactive")
-
 					template_name := c.String("name")
 					out_path := c.String("out")
 
@@ -69,31 +66,11 @@ func handle_cli(args []string) {
 						out_path += "/"
 					}
 
-					if is_default && is_interactive {
-						err := cli.ShowSubcommandHelp(c)
-						common.FailOnError(err, "")
-					} else if is_default {
-						template.CreateDefault(c, template_name, out_path)
-					} else if is_interactive {
-						template.CreateInteractively(c, template_name, out_path)
-					} else {
-						err := cli.ShowSubcommandHelp(c)
-						common.FailOnError(err, "")
-					}
+					template.CreateDefault(c, template_name, out_path)
 
 					return nil
 				},
 				Flags: []cli.Flag{
-					&cli.BoolFlag{
-						Name:    "default",
-						Aliases: []string{"d"},
-						Usage:   "Generates the template with default/empty values.",
-					},
-					&cli.BoolFlag{
-						Name:    "interactive",
-						Aliases: []string{"i"},
-						Usage:   "Generates the template interactively via the user prompts.",
-					},
 					&cli.StringFlag{
 						Name:     "name",
 						Required: true,
