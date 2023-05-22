@@ -14,12 +14,14 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+var MODULE_VERSION string = "1.0.0"
+
 func main() {}
 
 func handle_cli(args []string) {
 	app := &cli.App{
 		Name:     "lpm-builder",
-		Version:  "v0.0.1",
+		Version:  MODULE_VERSION,
 		Compiled: time.Now(),
 		Authors: []*cli.Author{
 			{
