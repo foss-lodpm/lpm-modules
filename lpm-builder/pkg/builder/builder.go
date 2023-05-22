@@ -55,7 +55,11 @@ func prepare(templateDir string) BuilderCtx {
 
 	}
 
-	err := os.Setenv(BUILD_ROOT_ENV_TAG, ctx.TmpPkgDir)
+	lpmExecutable, err := os.Executable()
+	common.FailOnError(err, "Couldn't set $LPM")
+	err = os.Setenv("LPM", lpmExecutable)
+
+	err = os.Setenv(BUILD_ROOT_ENV_TAG, ctx.TmpPkgDir)
 	common.FailOnError(err, "Couldn't set $"+BUILD_ROOT_ENV_TAG)
 
 	err = os.Setenv(SRC_ENV_TAG, ctx.TmpSrcDir)
