@@ -11,14 +11,14 @@ cd lpm-modules/lpm-builder
 make build
 ```
 
-## Update LPM configuration
+## Add to lpm
 
-To use the module on lpm, in `/etc/lpm/conf` file, append the following value in `modules` array
-```json
-{
-    "name": "builder",
-    "dylib_path": "$path_to_liblpm_builder.so"
-}
+To use the module you need to add the dynamic library to the database with the following lpm command(requires root privileges):
+
+```sh
+lpm --add-module builder {path to libexample_module.so}
+# check if it's added
+lpm --modules
 ```
 
 
