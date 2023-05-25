@@ -2,6 +2,7 @@ package builder
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"lpm_builder/pkg/common"
 	"lpm_builder/pkg/template"
@@ -102,7 +103,8 @@ func StartBuilding(templateDir string) {
 	common.FailOnError(err)
 
 	common.Logger.Println("Packing and generating the package")
-	lodOutputPath := filepath.Join(workingDir, ctx.TemplateFields.Name+".lod")
+	pkgOutputName := fmt.Sprintf("%s-%s.lod", ctx.TemplateFields.Name, ctx.TemplateFields.Version.ReadableFormat)
+	lodOutputPath := filepath.Join(workingDir, pkgOutputName)
 	PackLodFile(ctx.TmpPkgDir, lodOutputPath)
 
 	common.Logger.Println("Writing index patch")
