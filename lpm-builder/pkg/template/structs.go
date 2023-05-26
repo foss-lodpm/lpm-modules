@@ -34,6 +34,17 @@ type Dependencies struct {
 func (template *Template) validate() error {
 	common.Logger.Println("Validating template fields")
 
+	// field lengths
+	{
+		if len(template.Description) > 200 {
+			return errors.New("description exceeds maximum length of 155 characters")
+		}
+
+		if len(template.Tags) > 5 {
+			return errors.New("tags exceeds maximum length of 5 items")
+		}
+	}
+
 	// Package name
 	{
 		pkgNameRegex := regexp.MustCompile(`^[a-zA-Z0-9_-]+$`)
