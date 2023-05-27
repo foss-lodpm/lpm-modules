@@ -16,9 +16,9 @@ make build
 To use the module you need to add the dynamic library to the database with the following lpm command(requires root privileges):
 
 ```sh
-lpm --add-module builder {path to liblpm_builder.so}
+lpm --module --add builder {path to liblpm_builder.so}
 # check if it's added
-lpm --modules
+lpm --module --list
 ```
 
 
