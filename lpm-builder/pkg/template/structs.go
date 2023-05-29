@@ -99,9 +99,6 @@ func (template *Template) validate() error {
 
 		_, err = url.ParseRequestURI(template.Homepage)
 		common.FailOnError(err, "Invalid URL in homepage.")
-
-		_, err = url.ParseRequestURI(template.PkgRepository)
-		common.FailOnError(err, "Invalid URL in pkg_repository.")
 	}
 
 	return nil
