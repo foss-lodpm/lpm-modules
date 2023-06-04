@@ -56,8 +56,7 @@ The stage1 directory is optional and contains scripts that run on the lpm core l
 - `name`: The name of the package.
 - `description`: A description of what the package does.
 - `maintainer`: Contact information for the maintainer of the package.
-- `repository`(optional): The URL of the source code repository for the package.
-- `pkg_repository`: The URL of the package repository where the package can be downloaded from.
+- `source_repository`(optional):  The URL of the source code repository for the package.
 - `homepage`(optional): The URL of the package's homepage.
 - `arch`: The architecture of the package.
 - `kind`: The type of package.
@@ -119,13 +118,12 @@ install_to_package sbs /usr/bin/sbs
 
 Copy the following content into `template`
 
-```sh
+```json
 {
     "name": "sbs",
     "description": "Simple background setter",
     "maintainer": "Lpm Core Maintainer <contact@onurozkan.dev>",
-    "repository": "https://github.com/ozkanonur/sbs",
-    "pkg_repository": "https://repository.amd64.lodpm.com",
+    "source_repository": "https://github.com/ozkanonur/sbs",
     "homepage": "https://github.com/ozkanonur/sbs",
     "arch": "amd64",
     "kind": "util",

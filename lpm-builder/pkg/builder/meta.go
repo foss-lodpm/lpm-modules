@@ -23,17 +23,9 @@ type File struct {
 
 type Meta struct {
 	Name          string              `json:"name"`
-	Description   string              `json:"description"`
-	Maintainer    string              `json:"maintainer"`
-	Repository    string              `json:"repository"`
-	PkgRepository string              `json:"pkg_repository"`
-	Homepage      string              `json:"homepage"`
 	Arch          string              `json:"arch"`
-	Kind          string              `json:"kind"`
 	InstalledSize uint                `json:"installed_size"`
-	Tags          []string            `json:"tags"`
 	Version       common.Version      `json:"version"`
-	License       string              `json:"license"`
 	Dependencies  []common.Dependency `json:"dependencies"`
 	Suggestions   []common.Dependency `json:"suggestions"`
 }
@@ -90,17 +82,9 @@ func genMetaFromTemplateFields(ctx *BuilderCtx) Meta {
 	var meta Meta
 
 	meta.Name = ctx.TemplateFields.Name
-	meta.Description = ctx.TemplateFields.Description
-	meta.Maintainer = ctx.TemplateFields.Maintainer
-	meta.Repository = ctx.TemplateFields.Repository
-	meta.PkgRepository = ctx.TemplateFields.PkgRepository
-	meta.Homepage = ctx.TemplateFields.Homepage
 	meta.Arch = ctx.TemplateFields.Arch
-	meta.Kind = ctx.TemplateFields.Kind
 	meta.InstalledSize = ctx.InstallSize
-	meta.Tags = ctx.TemplateFields.Tags
 	meta.Version = ctx.TemplateFields.Version
-	meta.License = ctx.TemplateFields.License
 	meta.Dependencies = ctx.TemplateFields.MandatoryDependencies.Runtime
 	meta.Suggestions = ctx.TemplateFields.SuggestedDependencies.Runtime
 

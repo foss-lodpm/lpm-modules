@@ -13,7 +13,7 @@ func CreateDefault(c *cli.Context, template_name string, out_path string) {
 		Name:             template_name,
 		Description:      "",
 		Maintainer:       "",
-		Repository:       "",
+		SourceRepository: "",
 		Homepage:         "",
 		Arch:             "",
 		Kind:             "",

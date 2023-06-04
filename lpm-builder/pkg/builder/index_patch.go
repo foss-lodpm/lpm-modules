@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"lpm_builder/pkg/common"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -16,13 +17,15 @@ func GenerateIndexPatch(ctx *BuilderCtx) {
 
 	timestamp := time.Now().UTC().Unix()
 
-	insertPart := "INSERT INTO repository (name, description, maintainer, kind, installed_size, license, v_major, v_minor, v_patch, v_tag, v_readable, index_timestamp)"
+	insertPart := "INSERT INTO repository (name, description, maintainer, source_repository, kind, tags, installed_size, license, v_major, v_minor, v_patch, v_tag, v_readable, index_timestamp)"
 
-	valuesPart := fmt.Sprintf(`VALUES ("%s", "%s", "%s", "%s", %d, "%s", %d, %d, %d, "%s", "%s", %d);`,
+	valuesPart := fmt.Sprintf(`VALUES ("%s", "%s", "%s", "%s", "%s", "%s", %d, "%s", %d, %d, %d, "%s", "%s", %d);`,
 		ctx.TemplateFields.Name,
 		ctx.TemplateFields.Description,
 		ctx.TemplateFields.Maintainer,
+		ctx.TemplateFields.SourceRepository,
 		ctx.TemplateFields.Kind,
+		strings.Join(ctx.TemplateFields.Tags, ","),
 		ctx.InstallSize,
 		ctx.TemplateFields.License,
 		ctx.TemplateFields.Version.Major,

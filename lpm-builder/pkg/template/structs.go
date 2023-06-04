@@ -13,8 +13,7 @@ type Template struct {
 	Name                  string         `json:"name"`
 	Description           string         `json:"description"`
 	Maintainer            string         `json:"maintainer"`
-	Repository            string         `json:"repository"`
-	PkgRepository         string         `json:"pkg_repository"`
+	SourceRepository      string         `json:"source_repository"`
 	Homepage              string         `json:"homepage"`
 	Arch                  string         `json:"arch"`
 	Kind                  string         `json:"kind"`
@@ -94,10 +93,12 @@ func (template *Template) validate() error {
 
 	// URLs
 	{
-		_, err := url.ParseRequestURI(template.Repository)
-		common.FailOnError(err, "Invalid URL in repository.")
+		if len(template.SourceRepository) > 0 {
+			_, err := url.ParseRequestURI(template.SourceRepository)
+			common.FailOnError(err, "Invalid URL in source_repository.")
+		}
 
-		_, err = url.ParseRequestURI(template.Homepage)
+		_, err := url.ParseRequestURI(template.Homepage)
 		common.FailOnError(err, "Invalid URL in homepage.")
 	}
 
