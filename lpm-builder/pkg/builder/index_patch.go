@@ -36,7 +36,7 @@ func GenerateIndexPatch(ctx *BuilderCtx) {
 		timestamp,
 	)
 
-	finalVersion := insertPart + " " + valuesPart
+	finalVersion := fmt.Sprintf("%s %s\n", insertPart, valuesPart)
 
 	outputName := fmt.Sprintf("%d-%s.sql", timestamp, ctx.TemplateFields.Name)
 	err := os.WriteFile(outputName, []byte(finalVersion), 0644)
