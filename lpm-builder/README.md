@@ -6,7 +6,7 @@ lpm-builder is a dynamic module for lod package manager that allows users to cre
 ## Building lpm-builder from Source
 
 ```sh
-git clone https://github.com/foss-lodpm/lpm-modules.git
+git clone https://github.com/lodosgroup/lpm-modules.git
 cd lpm-modules/lpm-builder
 make build
 ```
