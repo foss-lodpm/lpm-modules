@@ -1,7 +1,6 @@
 package template
 
 import (
-	"encoding/json"
 	common "lpm_builder/pkg/common"
 	"os"
 
@@ -33,7 +32,7 @@ func CreateDefault(c *cli.Context, template_name string, out_path string) {
 
 	common.SetReadableVersion(&template.Version)
 
-	template_json, err := json.MarshalIndent(template, "", "\t")
+	template_json, err := common.Utf8FriendlyJsonMarshal(template)
 	common.FailOnError(err, "Failed on serializing template to json string")
 
 	err = os.WriteFile(out_path+"template.json", template_json, 0644)

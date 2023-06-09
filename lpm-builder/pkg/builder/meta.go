@@ -4,7 +4,6 @@ import (
 	"crypto/md5"
 	"crypto/sha256"
 	"crypto/sha512"
-	"encoding/json"
 	"fmt"
 	"hash"
 	"io"
@@ -92,7 +91,7 @@ func genMetaFromTemplateFields(ctx *BuilderCtx) Meta {
 }
 
 func marshalAndWriteFilesJson(ctx *BuilderCtx) {
-	file, err := json.MarshalIndent(ctx.PkgFilesData, "", "\t")
+	file, err := common.Utf8FriendlyJsonMarshal(ctx.PkgFilesData)
 	common.FailOnError(err, "Failed on serializing ctx.PkgFilesData")
 
 	common.Logger.Println("Writing meta/files.json")
@@ -102,7 +101,7 @@ func marshalAndWriteFilesJson(ctx *BuilderCtx) {
 }
 
 func marshalAndWriteMetaJson(meta Meta, metaDir string) {
-	file, err := json.MarshalIndent(meta, "", "\t")
+	file, err := common.Utf8FriendlyJsonMarshal(meta)
 	common.FailOnError(err, "Failed on serializing Meta fields")
 
 	common.Logger.Println("Writing meta/meta.json")

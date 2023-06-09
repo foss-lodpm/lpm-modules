@@ -1,7 +1,6 @@
 package builder
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"lpm_builder/pkg/common"
@@ -70,7 +69,7 @@ func prepare(templateDir string) BuilderCtx {
 }
 
 func marshalAndWriteSystemJson(ctx *BuilderCtx) {
-	file, err := json.MarshalIndent(ctx.System, "", "\t")
+	file, err := common.Utf8FriendlyJsonMarshal(ctx.System)
 	common.FailOnError(err, "Failed on serializing ctx.System")
 
 	common.Logger.Println("Writing system.json")
@@ -86,6 +85,8 @@ func cleanup(ctx BuilderCtx) {
 
 func StartBuilding(templateDir string) {
 	ctx := prepare(templateDir)
+
+	InstallBuildTimeDependencies(&ctx)
 
 	CopyProvidedStage1Scripts(&ctx)
 

@@ -130,5 +130,29 @@ func DeserializeTemplate(templateDirPath string) Template {
 	err = template.validate()
 	common.FailOnError(err)
 
+	for i := range template.MandatoryDependencies.Runtime {
+		if len(template.MandatoryDependencies.Runtime[i].Version.Condition) == 0 {
+			template.MandatoryDependencies.Runtime[i].Version.Condition = ">="
+		}
+	}
+
+	for i := range template.MandatoryDependencies.Build {
+		if len(template.MandatoryDependencies.Build[i].Version.Condition) == 0 {
+			template.MandatoryDependencies.Build[i].Version.Condition = ">="
+		}
+	}
+
+	for i := range template.SuggestedDependencies.Runtime {
+		if len(template.SuggestedDependencies.Runtime[i].Version.Condition) == 0 {
+			template.SuggestedDependencies.Runtime[i].Version.Condition = ">="
+		}
+	}
+
+	for i := range template.SuggestedDependencies.Build {
+		if len(template.SuggestedDependencies.Build[i].Version.Condition) == 0 {
+			template.SuggestedDependencies.Build[i].Version.Condition = ">="
+		}
+	}
+
 	return template
 }

@@ -1,6 +1,8 @@
 package common
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -20,6 +22,7 @@ type Version struct {
 	Minor          uint    `json:"minor"`
 	Patch          uint    `json:"patch"`
 	Tag            *string `json:"tag"`
+	Condition      string  `json:"condition"`
 }
 
 type Dependency struct {
@@ -104,4 +107,12 @@ func CopyIfExists(srcPath, destPath string) error {
 	}
 
 	return nil
+}
+
+func Utf8FriendlyJsonMarshal(i interface{}) ([]byte, error) {
+	buffer := &bytes.Buffer{}
+	encoder := json.NewEncoder(buffer)
+	encoder.SetEscapeHTML(false)
+	err := encoder.Encode(i)
+	return bytes.TrimRight(buffer.Bytes(), "\n"), err
 }
