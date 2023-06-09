@@ -63,8 +63,12 @@ func execute(scriptPath string, script string, executeIn string) {
 
 	cmd := exec.Command("/bin/bash", "-c", PrepareScript(scriptPath, script))
 	cmd.Dir = executeIn
-	_, err := cmd.Output()
-	common.FailOnError(err, "Couldn't execute "+script+" script from template directory.")
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		common.Logger.Print("\n\n")
+		common.FailOnError(err, "Couldn't execute "+script+" script from template directory.\n" + string(out))
+	}
+	common.Logger.Printf("%s", out)
 
 }
 
