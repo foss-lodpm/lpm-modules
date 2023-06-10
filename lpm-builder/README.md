@@ -76,6 +76,7 @@ The lpm-builder module provides the following built-in functions that can be use
 
 - `validate_checksum(file_path, sha256_checksum)`: This function takes two arguments: the path of the file to validate, and the SHA256 checksum of the file. It validates the checksum of the file and throws an error if it doesn't match the provided checksum.
 - `install_to_package(source_file_path, dest_path)`: This function puts files into the lod package. It takes two arguments: the path of the source file to be added to the package, and the path where lpm should install the file when the package is installed.
+- `copy_to_package(source_dir_path, dest_path)`: This function puts copies directory into the lod package. It takes two arguments: the path of the source directory to be added to the package, and the path where lpm should install the directory when the package is installed.
 
 
 ## Real Example of Building a Simple Package

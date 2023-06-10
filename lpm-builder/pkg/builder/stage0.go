@@ -34,6 +34,14 @@ function install_to_package {
 
 	install -D $SRC/$src_file program/$target
 }
+
+function copy_to_package {
+	src_dir="$1"
+	target="$2"
+
+	mkdir -p program/$target
+	cp -r $SRC/$src_dir program/$target
+}
 `
 
 const (
