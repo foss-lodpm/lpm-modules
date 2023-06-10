@@ -17,7 +17,7 @@ func GenerateIndexPatch(ctx *BuilderCtx) {
 
 	timestamp := time.Now().UTC().Unix()
 
-	insertPart := "INSERT INTO repository (name, description, maintainer, source_repository, kind, tags, installed_size, license, v_major, v_minor, v_patch, v_tag, v_readable, mandatory_dependencies, suggested_dependencies, index_timestamp)"
+	insertPart := "INSERT INTO repository (name, description, maintainer, source_repository, arch, kind, tags, installed_size, license, v_major, v_minor, v_patch, v_tag, v_readable, mandatory_dependencies, suggested_dependencies, index_timestamp)"
 
 	var mandatoryDependencies []string
 	for _, val := range ctx.TemplateFields.MandatoryDependencies.Runtime {
@@ -31,11 +31,12 @@ func GenerateIndexPatch(ctx *BuilderCtx) {
 		suggestedDependencies = append(suggestedDependencies, pkg_with_version)
 	}
 
-	valuesPart := fmt.Sprintf(`VALUES ("%s", "%s", "%s", "%s", "%s", "%s", %d, "%s", %d, %d, %d, "%s", "%s", "%s", "%s", %d);`,
+	valuesPart := fmt.Sprintf(`VALUES ("%s", "%s", "%s", "%s", "%s", "%s", "%s", %d, "%s", %d, %d, %d, "%s", "%s", "%s", "%s", %d);`,
 		ctx.TemplateFields.Name,
 		ctx.TemplateFields.Description,
 		ctx.TemplateFields.Maintainer,
 		ctx.TemplateFields.SourceRepository,
+		ctx.TemplateFields.Arch,
 		ctx.TemplateFields.Kind,
 		strings.Join(ctx.TemplateFields.Tags, ","),
 		ctx.InstallSize,
