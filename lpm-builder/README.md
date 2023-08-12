@@ -81,9 +81,9 @@ The lpm-builder module provides the following built-in functions that can be use
 
 ## Real Example of Building a Simple Package
 
-In this example, we'll build a package for the [sbs](https://github.com/ozkanonur/sbs) tool, which is a simple background setter.
+In this example, we will demonstrate how to build a package for the [sbs(simple background setter)](https://github.com/ozkanonur/sbs) tool.
 
-Prepare the required files for building [sbs](https://github.com/ozkanonur/sbs).
+Begin by preparing the necessary files for building [sbs](https://github.com/ozkanonur/sbs).
 
 ```sh
 mkdir sbs_build_template
@@ -151,4 +151,8 @@ Copy the following content into `template`
 }
 ```
 
-Now, you can run `lpm --module builder --build .` which will generate `sbs.lod` package for you.
+Now, you can run the following command to generate the `sbs.lod` package along with its repository index (a patch for the LPM repository database):
+
+```sh
+lpm --module builder --build .
+```
