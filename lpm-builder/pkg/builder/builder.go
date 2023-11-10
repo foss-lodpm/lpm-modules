@@ -38,6 +38,8 @@ func prepare(templateDir string) BuilderCtx {
 
 	ctx.TemplateFields = template.DeserializeTemplate(ctx.TemplateDir)
 
+	ctx.PkgFilesData = make([]File, 0)
+
 	ctx.System.BuilderVersion = common.BuilderVersion
 	ctx.System.MinSupportedLpmVersion = common.MinSupportedLpmVersion
 
