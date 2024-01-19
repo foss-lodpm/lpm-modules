@@ -14,23 +14,15 @@ func CreateDefault(c *cli.Context, template_name string, out_path string) {
 		Maintainer:       "",
 		SourceRepository: "",
 		Homepage:         "",
-		Arch:             "",
 		Kind:             "",
-		FileChecksumAlgo: "",
 		Tags:             []string{},
-		Version:          common.Version{},
 		License:          "",
-		MandatoryDependencies: Dependencies{
-			Build:   []common.Dependency{},
-			Runtime: []common.Dependency{},
-		},
-		SuggestedDependencies: Dependencies{
-			Build:   []common.Dependency{},
-			Runtime: []common.Dependency{},
-		},
+		Builds:           make(map[string]*Build),
 	}
 
-	common.SetReadableVersion(&template.Version)
+	for _, build := range template.Builds {
+		common.SetReadableVersion(&build.Version)
+	}
 
 	template_json, err := common.Utf8FriendlyJsonMarshal(template)
 	common.FailOnError(err, "Failed on serializing template to json string")

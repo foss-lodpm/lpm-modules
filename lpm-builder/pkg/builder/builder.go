@@ -85,16 +85,19 @@ func cleanup(ctx BuilderCtx) {
 	common.FailOnError(err, "Failed cleaning the temporary files of building lod package.")
 }
 
-func StartBuilding(templateDir string) {
+func StartBuilding(templateDir string, targetBuild string) {
 	ctx := prepare(templateDir)
 
-	InstallBuildTimeDependencies(&ctx)
+	build, targetExists := ctx.TemplateFields.Builds[""]
+	common.Assert(targetExists, fmt.Sprintf("Target build '%s' not found in `builds`.", targetBuild))
+
+	InstallBuildTimeDependencies(build)
 
 	CopyProvidedStage1Scripts(&ctx)
 
 	executeStage0(&ctx)
-	computeChecksumsAndInstallSize(&ctx)
-	generateMetaFiles(&ctx)
+	computeChecksumsAndInstallSize(&ctx, build)
+	generateMetaFiles(&ctx, build)
 	marshalAndWriteSystemJson(&ctx)
 
 	// Get the current working directory
@@ -106,12 +109,12 @@ func StartBuilding(templateDir string) {
 	common.FailOnError(err)
 
 	common.Logger.Println("Packing and generating the package")
-	pkgOutputName := fmt.Sprintf("%s-%s.lod", ctx.TemplateFields.Name, ctx.TemplateFields.Version.ReadableFormat)
+	pkgOutputName := fmt.Sprintf("%s-%s.lod", ctx.TemplateFields.Name, build.Version.ReadableFormat)
 	lodOutputPath := filepath.Join(workingDir, pkgOutputName)
 	PackLodFile(ctx.TmpPkgDir, lodOutputPath)
 
 	common.Logger.Println("Writing index patch")
-	GenerateIndexPatch(&ctx)
+	GenerateIndexPatch(&ctx, build)
 
 	cleanup(ctx)
 }

@@ -9,6 +9,7 @@ import (
 	"io"
 	"io/ioutil"
 	"lpm_builder/pkg/common"
+	"lpm_builder/pkg/template"
 	"os"
 	"path/filepath"
 	"strings"
@@ -22,7 +23,6 @@ type File struct {
 
 type Meta struct {
 	Name          string              `json:"name"`
-	Arch          string              `json:"arch"`
 	InstalledSize uint                `json:"installed_size"`
 	Version       common.Version      `json:"version"`
 	Dependencies  []common.Dependency `json:"dependencies"`
@@ -53,7 +53,7 @@ func getHashOfFile(filePath string, hashAlgorithm string) string {
 	return fmt.Sprintf("%x", hash.Sum(nil))
 }
 
-func computeChecksumsAndInstallSize(ctx *BuilderCtx) {
+func computeChecksumsAndInstallSize(ctx *BuilderCtx, build *template.Build) {
 	err := filepath.Walk(ctx.TmpProgramDir, func(path string, info os.FileInfo, err error) error {
 		common.FailOnError(err, "Failed while searching files in "+ctx.TmpProgramDir)
 
@@ -62,8 +62,8 @@ func computeChecksumsAndInstallSize(ctx *BuilderCtx) {
 
 			file := File{
 				Path:              strings.Split(path, "/program/")[1],
-				ChecksumAlgorithm: ctx.TemplateFields.FileChecksumAlgo,
-				Checksum:          getHashOfFile(path, ctx.TemplateFields.FileChecksumAlgo),
+				ChecksumAlgorithm: *build.FileChecksumAlgo,
+				Checksum:          getHashOfFile(path, *build.FileChecksumAlgo),
 			}
 
 			common.Logger.Printf("computed %s as %s checksum for file %s", file.Checksum, file.ChecksumAlgorithm, file.Path)
@@ -77,15 +77,14 @@ func computeChecksumsAndInstallSize(ctx *BuilderCtx) {
 	common.FailOnError(err, "filepath.Walk failed for "+ctx.TmpProgramDir)
 }
 
-func genMetaFromTemplateFields(ctx *BuilderCtx) Meta {
+func genMetaFromTemplateFields(ctx *BuilderCtx, build *template.Build) Meta {
 	var meta Meta
 
 	meta.Name = ctx.TemplateFields.Name
-	meta.Arch = ctx.TemplateFields.Arch
 	meta.InstalledSize = ctx.InstallSize
-	meta.Version = ctx.TemplateFields.Version
-	meta.Dependencies = ctx.TemplateFields.MandatoryDependencies.Runtime
-	meta.Suggestions = ctx.TemplateFields.SuggestedDependencies.Runtime
+	meta.Version = build.Version
+	meta.Dependencies = build.MandatoryDependencies.Runtime
+	meta.Suggestions = build.SuggestedDependencies.Runtime
 
 	return meta
 }
@@ -110,9 +109,9 @@ func marshalAndWriteMetaJson(meta Meta, metaDir string) {
 	common.FailOnError(err)
 }
 
-func generateMetaFiles(ctx *BuilderCtx) {
+func generateMetaFiles(ctx *BuilderCtx, build *template.Build) {
 	marshalAndWriteFilesJson(ctx)
 
-	meta := genMetaFromTemplateFields(ctx)
+	meta := genMetaFromTemplateFields(ctx, build)
 	marshalAndWriteMetaJson(meta, ctx.TmpMetaDir)
 }

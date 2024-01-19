@@ -116,3 +116,9 @@ func Utf8FriendlyJsonMarshal(i interface{}) ([]byte, error) {
 	err := encoder.Encode(i)
 	return bytes.TrimRight(buffer.Bytes(), "\n"), err
 }
+
+func Assert(condition bool, message string) {
+	if !condition {
+		panic(fmt.Sprintf("assertion failed at %s", message))
+	}
+}

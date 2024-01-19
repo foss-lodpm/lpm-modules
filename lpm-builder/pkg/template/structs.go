@@ -3,6 +3,7 @@ package template
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	common "lpm_builder/pkg/common"
 	"net/url"
@@ -10,17 +11,20 @@ import (
 )
 
 type Template struct {
-	Name                  string         `json:"name"`
-	Description           string         `json:"description"`
-	Maintainer            string         `json:"maintainer"`
-	SourceRepository      string         `json:"source_repository"`
-	Homepage              string         `json:"homepage"`
-	Arch                  string         `json:"arch"`
-	Kind                  string         `json:"kind"`
-	FileChecksumAlgo      string         `json:"file_checksum_algo"`
-	Tags                  []string       `json:"tags"`
+	Name             string            `json:"name"`
+	Description      string            `json:"description"`
+	Maintainer       string            `json:"maintainer"`
+	SourceRepository string            `json:"source_repository"`
+	Homepage         string            `json:"homepage"`
+	Kind             string            `json:"kind"`
+	Tags             []string          `json:"tags"`
+	License          string            `json:"license"`
+	Builds           map[string]*Build `json:"builds"`
+}
+
+type Build struct {
+	FileChecksumAlgo      *string        `json:"file_checksum_algo"`
 	Version               common.Version `json:"version"`
-	License               string         `json:"license"`
 	MandatoryDependencies Dependencies   `json:"mandatory_dependencies"`
 	SuggestedDependencies Dependencies   `json:"suggested_dependencies"`
 }
@@ -53,41 +57,34 @@ func (template *Template) validate() error {
 		}
 	}
 
-	// Architecture
+	// Builds
 	{
-		var supportedArchitectures []string = []string{
-			"amd64",
-			"aarch64",
-			"i686",
-			"arm",
-			"armv7",
-			"mips",
-			"mips64",
-			"mips64el",
-			"mipsel",
-			"powerpc",
-			"powerpc64",
-			"powerpc64le",
-			"riscv64gc",
-			"s390x",
-		}
+		common.Assert(len(template.Builds) > 0, "You must define at least one build in `builds` field.")
+		for build_name, build := range template.Builds {
+			var supportedAlgorithms []string = []string{
+				"md5",
+				"sha256",
+				"sha512",
+			}
 
-		if !common.Contains(supportedArchitectures, template.Arch) {
-			return errors.New("Unsupported architecture.")
-		}
+			if build_name == "source" {
+				common.Assert(build.FileChecksumAlgo == nil, "`file_checksum_algo` is not supported for source packages.")
+			} else {
+				common.Assert(common.Contains(supportedAlgorithms, *build.FileChecksumAlgo), fmt.Sprintf("Unsupported checksum algorithm used for '%s' build. Supported algorithms: %v", build_name, supportedAlgorithms))
+			}
 
-	}
+			var supportedBuilds []string = []string{
+				"amd64",
+				"source",
+				"noarch",
+			}
 
-	// File checksum algorithm
-	{
-		var supportedAlgorithms []string = []string{
-			"md5",
-			"sha256",
-			"sha512",
-		}
+			common.Assert(common.Contains(supportedBuilds, build_name), fmt.Sprintf("Unsupported build '%s'. Supported builds (please contact with maintainers to support more builds): %v", build_name, supportedBuilds))
 
-		if !common.Contains(supportedAlgorithms, template.FileChecksumAlgo) {
-			return errors.New("Unsupported checksum algorithm.")
+			if build_name == "source" {
+				common.Assert(len(build.MandatoryDependencies.Build) == 0, "source packages can not contain build time dependencies")
+				common.Assert(len(build.SuggestedDependencies.Build) == 0, "source packages can not contain build time dependencies")
+			}
 		}
 	}
 
@@ -111,14 +108,7 @@ func DeserializeTemplate(templateDirPath string) Template {
 	const templateLeafPath = "/template"
 
 	var template = Template{
-		MandatoryDependencies: Dependencies{
-			Build:   []common.Dependency{},
-			Runtime: []common.Dependency{},
-		},
-		SuggestedDependencies: Dependencies{
-			Build:   []common.Dependency{},
-			Runtime: []common.Dependency{},
-		},
+		Builds: make(map[string]*Build),
 	}
 
 	template_json_content, err := ioutil.ReadFile(templateDirPath + templateLeafPath)
@@ -130,27 +120,29 @@ func DeserializeTemplate(templateDirPath string) Template {
 	err = template.validate()
 	common.FailOnError(err)
 
-	for i := range template.MandatoryDependencies.Runtime {
-		if len(template.MandatoryDependencies.Runtime[i].Version.Condition) == 0 {
-			template.MandatoryDependencies.Runtime[i].Version.Condition = ">="
+	for _, build := range template.Builds {
+		for i := range build.MandatoryDependencies.Runtime {
+			if len(build.MandatoryDependencies.Runtime[i].Version.Condition) == 0 {
+				build.MandatoryDependencies.Runtime[i].Version.Condition = ">="
+			}
 		}
-	}
 
-	for i := range template.MandatoryDependencies.Build {
-		if len(template.MandatoryDependencies.Build[i].Version.Condition) == 0 {
-			template.MandatoryDependencies.Build[i].Version.Condition = ">="
+		for i := range build.MandatoryDependencies.Build {
+			if len(build.MandatoryDependencies.Build[i].Version.Condition) == 0 {
+				build.MandatoryDependencies.Build[i].Version.Condition = ">="
+			}
 		}
-	}
 
-	for i := range template.SuggestedDependencies.Runtime {
-		if len(template.SuggestedDependencies.Runtime[i].Version.Condition) == 0 {
-			template.SuggestedDependencies.Runtime[i].Version.Condition = ">="
+		for i := range build.SuggestedDependencies.Runtime {
+			if len(build.SuggestedDependencies.Runtime[i].Version.Condition) == 0 {
+				build.SuggestedDependencies.Runtime[i].Version.Condition = ">="
+			}
 		}
-	}
 
-	for i := range template.SuggestedDependencies.Build {
-		if len(template.SuggestedDependencies.Build[i].Version.Condition) == 0 {
-			template.SuggestedDependencies.Build[i].Version.Condition = ">="
+		for i := range build.SuggestedDependencies.Build {
+			if len(build.SuggestedDependencies.Build[i].Version.Condition) == 0 {
+				build.SuggestedDependencies.Build[i].Version.Condition = ">="
+			}
 		}
 	}
 

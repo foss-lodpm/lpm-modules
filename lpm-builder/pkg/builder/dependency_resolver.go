@@ -3,12 +3,14 @@ package builder
 import (
 	"fmt"
 	"lpm_builder/pkg/common"
+	"lpm_builder/pkg/template"
 	"os/exec"
 )
 
-func InstallBuildTimeDependencies(ctx *BuilderCtx) {
+func InstallBuildTimeDependencies(build *template.Build) {
 	common.Logger.Printf("Resolving build time dependencies..")
-	for _, value := range ctx.TemplateFields.MandatoryDependencies.Build {
+
+	for _, value := range build.MandatoryDependencies.Build {
 		pkg_with_version := fmt.Sprintf("%s@%s%s", value.Name, value.Version.Condition, value.Version.ReadableFormat)
 
 		common.Logger.Printf("Installing build time dependency %s", pkg_with_version)
