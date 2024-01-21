@@ -58,16 +58,17 @@ The stage1 directory is optional and contains scripts that run on the lpm core l
 - `maintainer`: Contact information for the maintainer of the package.
 - `source_repository`(optional):  The URL of the source code repository for the package.
 - `homepage`(optional): The URL of the package's homepage.
-- `arch`: The architecture of the package.
 - `kind`: The type of package.
-- `file_checksum_algo`: The algorithm used to compute the checksum of the package files.
 - `tags`: A list of tags or keywords that describe the package.
-- `version`: An object that contains version information for the package.
 - `license`(optional): The license under which the package is distributed.
-- `mandatory_dependencies.runtime`(optional): A list of the package's mandatory dependencies for runtime.
-- `mandatory_dependencies.build`(optional): A list of the package's mandatory dependencies for building it.
-- `suggested_dependencies.runtime`(optional): A list of the package's suggested dependencies for runtime.
-- `suggested_dependencies.build`(optional): A list of the package's suggested dependencies for building it.
+- `builds`: List of target packages to be built.
+- `builds.$target_name`: Name of the target package.
+- `builds.$target_name.version`: An object that contains version information for the package.
+- `builds.$target_name.file_checksum_algo`: The algorithm used to compute the checksum of the package files.
+- `builds.$target_name.mandatory_dependencies.runtime`(optional): A list of the package's mandatory dependencies for runtime.
+- `builds.$target_name.mandatory_dependencies.build`(optional): A list of the package's mandatory dependencies for building it.
+- `builds.$target_name.suggested_dependencies.runtime`(optional): A list of the package's suggested dependencies for runtime.
+- `builds.$target_name.suggested_dependencies.build`(optional): A list of the package's suggested dependencies for building it.
 
 
 ## `stage0` built-in functions
