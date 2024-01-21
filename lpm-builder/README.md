@@ -58,16 +58,17 @@ The stage1 directory is optional and contains scripts that run on the lpm core l
 - `maintainer`: Contact information for the maintainer of the package.
 - `source_repository`(optional):  The URL of the source code repository for the package.
 - `homepage`(optional): The URL of the package's homepage.
-- `arch`: The architecture of the package.
 - `kind`: The type of package.
-- `file_checksum_algo`: The algorithm used to compute the checksum of the package files.
 - `tags`: A list of tags or keywords that describe the package.
-- `version`: An object that contains version information for the package.
 - `license`(optional): The license under which the package is distributed.
-- `mandatory_dependencies.runtime`(optional): A list of the package's mandatory dependencies for runtime.
-- `mandatory_dependencies.build`(optional): A list of the package's mandatory dependencies for building it.
-- `suggested_dependencies.runtime`(optional): A list of the package's suggested dependencies for runtime.
-- `suggested_dependencies.build`(optional): A list of the package's suggested dependencies for building it.
+- `builds`: List of target packages to be built.
+- `builds.$target_name`: Name of the target package.
+- `builds.$target_name.version`: An object that contains version information for the package.
+- `builds.$target_name.file_checksum_algo`: The algorithm used to compute the checksum of the package files.
+- `builds.$target_name.mandatory_dependencies.runtime`(optional): A list of the package's mandatory dependencies for runtime.
+- `builds.$target_name.mandatory_dependencies.build`(optional): A list of the package's mandatory dependencies for building it.
+- `builds.$target_name.suggested_dependencies.runtime`(optional): A list of the package's suggested dependencies for runtime.
+- `builds.$target_name.suggested_dependencies.build`(optional): A list of the package's suggested dependencies for building it.
 
 
 ## `stage0` built-in functions
@@ -89,15 +90,15 @@ Begin by preparing the necessary files for building [sbs](https://github.com/ozk
 mkdir sbs_build_template
 cd sbs_build_template
 
-mkdir stage0
-touch stage0/init
-touch stage0/build
-touch stage0/install_files
+mkdir -p amd64/stage0
+touch amd64/stage0/init
+touch amd64/stage0/build
+touch amd64/stage0/install_files
 
 touch template
 ```
 
-Copy the following content into `stage0/init`
+Copy the following content into `amd64/stage0/init`
 
 ```sh
 curl -L https://github.com/ozkanonur/sbs/archive/refs/tags/v1.0.0.tar.gz > sbs.tar.gz
@@ -105,13 +106,13 @@ validate_checksum "sbs.tar.gz" "aa4da5b2315046fc2059599b19c530f08bb870e63ed17111
 tar -xvzf sbs.tar.gz --strip 1 -C $SRC
 ```
 
-Copy the following content into `stage0/build`
+Copy the following content into `amd64/stage0/build`
 
 ```sh
 make sbs
 ```
 
-Copy the following content into `stage0/install_files`
+Copy the following content into `amd64/stage0/install_files`
 
 ```sh
 install_to_package sbs /usr/bin/sbs
@@ -126,27 +127,30 @@ Copy the following content into `template`
     "maintainer": "Lpm Core Maintainer <contact@onurozkan.dev>",
     "source_repository": "https://github.com/ozkanonur/sbs",
     "homepage": "https://github.com/ozkanonur/sbs",
-    "arch": "amd64",
     "kind": "util",
-    "file_checksum_algo": "sha256",
     "tags": [
         "x11",
         "background-setter"
     ],
-    "version": {
-        "readable_format": "1.0.0",
-        "major": 1,
-        "minor": 0,
-        "patch": 0
-    },
     "license": "MIT",
-    "mandatory_dependencies": {
-        "build": [],
-        "runtime": []
-    },
-    "suggested_dependencies": {
-        "build": [],
-        "runtime": []
+    "builds": {
+        "amd64": {
+            "file_checksum_algo": "sha256",
+            "version": {
+                "readable_format": "1.0.0",
+                "major": 1,
+                "minor": 0,
+                "patch": 0
+            },
+            "mandatory_dependencies": {
+                "build": [],
+                "runtime": []
+            },
+            "suggested_dependencies": {
+                "build": [],
+                "runtime": []
+            }
+        }
     }
 }
 ```

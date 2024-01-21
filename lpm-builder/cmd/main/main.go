@@ -35,14 +35,22 @@ func handle_cli(args []string) {
 		UsageText: "lpm -m builder [global options] command [command options] [arguments...]",
 		Action: func(c *cli.Context) error {
 			templateDir := c.String("build")
+			targetBuild := c.String("target")
+
 			templateDir, err := filepath.Abs(templateDir)
 			common.FailOnError(err)
 
-			builder.StartBuilding(templateDir)
+			builder.StartBuilding(templateDir, targetBuild)
 
 			return nil
 		},
 		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:     "target",
+				Required: false,
+				Aliases:  []string{"t"},
+				Usage:    "Name of the build target (one of `builds` name in the template)",
+			},
 			&cli.StringFlag{
 				Name:     "build",
 				Required: false,
