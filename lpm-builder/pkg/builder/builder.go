@@ -7,6 +7,7 @@ import (
 	"lpm_builder/pkg/template"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 const (
@@ -30,7 +31,7 @@ type BuilderCtx struct {
 	InstallSize      uint
 }
 
-func prepare(templateDir string) BuilderCtx {
+func prepare(templateDir string, targetBuild string) BuilderCtx {
 	common.Logger.Println("Preparing for building")
 
 	var ctx BuilderCtx
@@ -48,8 +49,8 @@ func prepare(templateDir string) BuilderCtx {
 	ctx.TmpMetaDir = filepath.Join(ctx.TmpPkgDir, "meta")
 	ctx.TmpProgramDir = filepath.Join(ctx.TmpPkgDir, "program")
 	ctx.TmpScriptsDir = filepath.Join(ctx.TmpPkgDir, "scripts")
-	ctx.Stage0ScriptsDir = filepath.Join(ctx.TemplateDir, "stage0")
-	ctx.Stage1ScriptsDir = filepath.Join(ctx.TemplateDir, "stage1")
+	ctx.Stage0ScriptsDir = filepath.Join(ctx.TemplateDir, targetBuild, "stage0")
+	ctx.Stage1ScriptsDir = filepath.Join(ctx.TemplateDir, targetBuild, "stage1")
 
 	for _, dir := range []string{ctx.TmpMetaDir, ctx.TmpProgramDir, ctx.TmpSrcDir, ctx.TmpScriptsDir} {
 		err := os.MkdirAll(dir, os.ModePerm)
@@ -86,17 +87,24 @@ func cleanup(ctx BuilderCtx) {
 }
 
 func StartBuilding(templateDir string, targetBuild string) {
-	ctx := prepare(templateDir)
+	common.Assert(len(strings.TrimSpace(targetBuild)) != 0, "Package target is not provided (use `--target` to choice one)")
 
-	build, targetExists := ctx.TemplateFields.Builds[""]
-	common.Assert(targetExists, fmt.Sprintf("Target build '%s' not found in `builds`.", targetBuild))
+	ctx := prepare(templateDir, targetBuild)
+
+	build, targetExists := ctx.TemplateFields.Builds[targetBuild]
+	common.Assert(targetExists, fmt.Sprintf("Target build '%d' not found in `builds`.", len(targetBuild)))
 
 	InstallBuildTimeDependencies(build)
 
 	CopyProvidedStage1Scripts(&ctx)
 
 	executeStage0(&ctx)
-	computeChecksumsAndInstallSize(&ctx, build)
+
+	// We can't know size and checksum of files for source packages.
+	if targetBuild != "source" {
+		computeChecksumsAndInstallSize(&ctx, build)
+	}
+
 	generateMetaFiles(&ctx, build)
 	marshalAndWriteSystemJson(&ctx)
 
